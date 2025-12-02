@@ -1,0 +1,602 @@
+
+
+"""
+   Para crear un nuevo user de rol alumno
+    """
+http://127.0.0.1:5000/users/create
+{"nombre": "Carlos2", 
+ "apellido": "Jass2",
+ "email": "p2carlos@test.com",
+ "celular": "55345569", 
+ "password": "test123", 
+ "solicitud_user_especial": false
+}
+"""
+   Para crear un nuevo user de rol profesor
+    """
+http://127.0.0.1:5000/users/create
+{"nombre": "Carlos2", 
+ "apellido": "Jass2",
+ "email": "p2carlos@test.com",
+ "celular": "55345569", 
+ "password": "test123", 
+ "solicitud_user_especial": false
+}
+"""
+   Para crear un nuevo user de rol alumno
+    """
+http://127.0.0.1:5000/users/create
+{"nombre": "Carlos2", 
+ "apellido": "Jass2",
+ "email": "p2carlos@test.com",
+ "celular": "55345569", 
+ "password": "test123", 
+ "solicitud_user_especial": false
+}
+"""
+   Para crear un nuevo user de rol director
+    """
+http://localhost:5000/director/create
+{
+	 "nombre": "María",
+  "apellido": "González",
+  "email": "dMaria@test.com",
+  "celular": "987654321",
+  "password": "test123",
+  "departamento": "La Paz"
+}
+
+
+
+"""
+   Login
+    """
+http://localhost:5000/auth/login
+{
+
+	"email": "sin@gmail.com",
+  "password": "123456"	
+}
+
+
+
+
+    """
+    Crear un programa activo   POST
+    """
+http://localhost:5000/programas
+{
+  "nombre_programa": "Camino Femme",
+  "descricpcion_programa": "Programa principal de formación continua de bailarinas urbanas femeninas. Eje central de la escuela. Trabaja estilos como Heels, Dancehall, Afro, Salsa Femme, Twerk y Funk. Se organiza en categorías: Técnico (Regular ~2 meses con paquetes; Intensivo 1–2 días; Taller 1–2 días), Complementario (Especiales de 1 día) y Práctico (Producciones)."
+}
+
+
+
+    """
+    Crear un programa de tipo inactivo  POST
+    """
+http://localhost:5000/programas
+{
+    "nombre_programa": "Femme Kids"
+"descricpcion_programa": "Programa orientado a niñas y niños con enfoque en danza urbana femenina. Busca desarrollar coordinación, ritmo, musicalidad y confianza.",
+		"estado": false
+}
+
+Resultado:
+{
+	"message": "Programa creado exitosamente",
+	"programa": {
+		"descricpcion_programa": "Camino Femme",
+		"estado": true,
+		"id_programa": 1,
+		"nombre_programa": "Camino Femme"
+	}
+}
+
+
+    """
+    Ver un programa en especifico
+    """
+http://localhost:5000/programas/{id}
+    
+    """
+    Ver programas activos
+    """
+http://localhost:5000/programas/active
+
+
+    
+    """
+PUT actualizar un programa
+    """
+   http://localhost:5000/programas/{id} 
+
+    
+    """
+DELETE eliminar un programa, Cambia el estado de true a false
+    """
+http://localhost:5000/programas/3
+
+
+
+    """
+    DELETE eliminar un programa, borrado fisico. No
+    """
+    http://localhost:5000/programas/3/hard
+
+
+    """
+  POST crear una nueva categoria
+    """
+     {
+ "Programa_id_programa": 1,
+    "nombre_categoria": "Práctico",
+    "descripcion_categoria": "Producciones y prácticas escénicas para aplicar lo aprendido."
+  }
+
+  Resultado:
+  {
+	"categoria": {
+		"Programa_id_programa": 1,
+		"descripcion_categoria": "Producciones y prácticas escénicas para aplicar lo aprendido.",
+		"estado": true,
+		"id_categoria": 3,
+		"nombre_categoria": "Práctico"
+	},
+	"message": "Categoría creada exitosamente"
+}
+
+    """
+  GET ver categorias
+    """
+http://localhost:5000/categorias
+resultado:
+[
+	{
+		"Programa_id_programa": 1,
+		"descripcion_categoria": "Cursos para mejorar la técnica de estilos urbanos femeninos.",
+		"estado": true,
+		"id_categoria": 1,
+		"nombre_categoria": "Técnico"
+	},
+	{
+		"Programa_id_programa": 1,
+		"descripcion_categoria": "Experiencias temáticas de un día orientadas al disfrute y refuerzo.",
+		"estado": true,
+		"id_categoria": 2,
+		"nombre_categoria": "Complementario"
+	}
+]
+
+    """
+  GET ver una categoria en especifico
+    """
+http://localhost:5000/categorias/1
+resultado:
+{
+	"Programa_id_programa": 1,
+	"descripcion_categoria": "Cursos para mejorar la técnica de estilos urbanos femeninos.",
+	"estado": true,
+	"id_categoria": 1,
+	"nombre_categoria": "Técnico"
+}
+
+
+    """
+ GET ver categorias activas
+    """
+    http://localhost:5000/categorias/active
+
+    
+"""
+  GET Obtiene categorías activas de un programa
+    """
+
+http://localhost:5000/categorias/programa/1/active
+GET /categorias/programa/{programa_id}/active
+
+    
+
+    """
+    PUT actualizar categoria
+
+    """
+    http://localhost:5000/categorias/{id}
+
+{
+	"categoria": {
+		"Programa_id_programa": 1,
+		"descripcion_categoria": "Producciones y prácticas escénicas para aplicar lo aprendido.",
+		"estado": true,
+		"id_categoria": 3,
+		"nombre_categoria": "Práctico"
+	},
+	"message": "Categoría actualizada exitosamente"
+}
+
+    
+    """
+    DELETE borrado logico de una categoria
+
+    """
+http://localhost:5000/categorias/{id}
+
+
+    
+    """
+  POST crear nueva subcategoria 
+    """
+   http://localhost:5000/subcategorias
+
+  {
+    "Categoria_id_categoria": 3,
+    "nombre_subcategoria": "Producciones",
+    "descripcion_subcategoria": "Grabaciones/presentaciones de coreografías donde se demuestra lo aprendido"
+  }
+
+
+    
+    """
+GET Subcategorias Obtiene todas las subcategorías 
+    """
+    http://localhost:5000/subcategorias
+    
+    """
+GET Subcategorias Obtiene todas las subcategorías activas
+    """
+    http://localhost:5000/subcategorias/active
+    Resultado:
+    [
+	{
+		"Categoria_id_categoria": 1,
+		"descripcion_subcategoria": "Clases mensuales (~2 meses), puedes pagar con paquetes y tomar varios estilos y profes en el ciclo.",
+		"estado": true,
+		"id_subcategoria": 1,
+		"nombre_subcategoria": "Regular"
+	},
+	{
+		"Categoria_id_categoria": 1,
+		"descripcion_subcategoria": "Eventos de 1 a 2 días; pueden incluir varios bloques con distintos estilos y profes.",
+		"estado": true,
+		"id_subcategoria": 2,
+		"nombre_subcategoria": "Taller"
+	},
+	{
+		"Categoria_id_categoria": 1,
+		"descripcion_subcategoria": "Entrenamiento técnico concentrado (1–2 días) enfocado en uno o dos estilos.",
+		"estado": true,
+		"id_subcategoria": 3,
+		"nombre_subcategoria": "Intensivo"
+	},
+	{
+		"Categoria_id_categoria": 2,
+		"descripcion_subcategoria": "Jornadas de 1 día con temática (carnaval, halloween, etc.); combinan varios estilos.",
+		"estado": true,
+		"id_subcategoria": 4,
+		"nombre_subcategoria": "Especiales"
+	},
+	{
+		"Categoria_id_categoria": 3,
+		"descripcion_subcategoria": "Grabaciones/presentaciones de coreografías donde se demuestra lo aprendido",
+		"estado": true,
+		"id_subcategoria": 5,
+		"nombre_subcategoria": "Producciones"
+	}
+]
+
+
+
+     """
+GET  Obtiene subcategorías activas de una categoría
+    """
+    http://localhost:5000/subcategorias/categoria/{categoria_id}/active
+    http://localhost:5000/subcategorias/categoria/1/active
+resultado: 
+
+[
+	{
+		"Categoria_id_categoria": 1,
+		"descripcion_subcategoria": "Clases mensuales (~2 meses), puedes pagar con paquetes y tomar varios estilos y profes en el ciclo.",
+		"estado": true,
+		"id_subcategoria": 1,
+		"nombre_subcategoria": "Regular"
+	},
+	{
+		"Categoria_id_categoria": 1,
+		"descripcion_subcategoria": "Eventos de 1 a 2 días; pueden incluir varios bloques con distintos estilos y profes.",
+		"estado": true,
+		"id_subcategoria": 2,
+		"nombre_subcategoria": "Taller"
+	},
+	{
+		"Categoria_id_categoria": 1,
+		"descripcion_subcategoria": "Entrenamiento técnico concentrado (1–2 días) enfocado en uno o dos estilos.",
+		"estado": true,
+		"id_subcategoria": 3,
+		"nombre_subcategoria": "Intensivo"
+	}
+]
+
+
+    
+     """
+
+  PUT http://localhost:5000/subcategorias/{id}
+Actualiza una subcategoría
+
+"""
+
+
+
+    
+     """
+     DELETE http://localhost:5000/subcategorias/{id}
+Elimina una subcategoría (borrado lógico)
+
+    """
+
+
+
+    
+     """
+POST Crea una nueva sala
+    """
+http://localhost:5000/salas
+
+  {
+    "nombre_sala": "Universe Dance",
+    "ubicacion": "Edif. Sama, Piso 1, Av. 20 de Octubre, a media cuadra de la        Landaeta",
+    "link_ubicacion": "https://maps.app.goo.gl/MPHfRX3CqHguo5gC7",
+    "departamento": "LP",
+    "zona": "San Pedro"
+  }
+
+    
+     """
+GET Obtiene todas las salas activas
+    """
+http://localhost:5000/salas/active
+
+[
+	{
+		"departamento": "LP",
+		"estado": true,
+		"id_sala": 1,
+		"link_ubicacion": "https://maps.app.goo.gl/UUqXwQbeFRMJc8hP8",
+		"nombre_sala": "Studio Dance",
+		"ubicacion": "Plaza Abaroa, lado Café Alexander, Piso 1",
+		"zona": "Sopocachi"
+	},
+	{
+		"departamento": "LP",
+		"estado": true,
+		"id_sala": 2,
+		"link_ubicacion": "https://maps.app.goo.gl/MPHfRX3CqHguo5gC7",
+		"nombre_sala": "Universe Dance",
+		"ubicacion": "Edif. Sama, Piso 1, Av. 20 de Octubre, a media cuadra de la        Landaeta",
+		"zona": "San Pedro"
+	}
+]
+    
+     """
+     GET /salas/departamento/{departamento}/active
+Obtiene salas activas de un departamento
+
+    """
+
+http://localhost:5000/salas/departamento/LP/active
+
+[
+	{
+		"departamento": "LP",
+		"estado": true,
+		"id_sala": 1,
+		"link_ubicacion": "https://maps.app.goo.gl/UUqXwQbeFRMJc8hP8",
+		"nombre_sala": "Studio Dance",
+		"ubicacion": "Plaza Abaroa, lado Café Alexander, Piso 1",
+		"zona": "Sopocachi"
+	},
+	{
+		"departamento": "LP",
+		"estado": true,
+		"id_sala": 2,
+		"link_ubicacion": "https://maps.app.goo.gl/MPHfRX3CqHguo5gC7",
+		"nombre_sala": "Universe Dance",
+		"ubicacion": "Edif. Sama, Piso 1, Av. 20 de Octubre, a media cuadra de la        Landaeta",
+		"zona": "San Pedro"
+	}
+]
+    
+     """
+     GET /salas/zona/{zona}/active
+Obtiene salas activas de una zona
+
+    """
+
+
+
+    
+     """
+  GET http://localhost:5000/salas/{id}
+Obtiene una sala específica
+    """
+    http://localhost:5000/salas/1
+{
+	"departamento": "LP",
+	"estado": true,
+	"id_sala": 1,
+	"link_ubicacion": "https://maps.app.goo.gl/UUqXwQbeFRMJc8hP8",
+	"nombre_sala": "Studio Dance",
+	"ubicacion": "Plaza Abaroa, lado Café Alexander, Piso 1",
+	"zona": "Sopocachi"
+}
+
+
+    
+     """
+    POST /estilos/
+    Crea un nuevo estilo
+    """
+http://localhost:5000/estilos/
+{
+    "nombre_estilo": "Heels Floorwork",
+    "descripcion_estilo": "Trabajo de piso en tacones con énfasis en control, líneas y transiciones seguras.",
+    "beneficios_estilo": "Flexibilidad, fuerza de core y fluidez en transiciones al piso."
+  }
+
+
+
+    
+     """
+  GET Obtiene todos los estilos activos
+    """
+    http://localhost:5000/estilos/active
+
+[
+	{
+		"beneficios_estilo": "Mejora equilibrio, líneas y presencia escénica, refuerza core y glúteos.",
+		"descripcion_estilo": "Técnica y coreografía en tacones.",
+		"estado": true,
+		"id_estilo": 1,
+		"nombre_estilo": "Heels"
+	},
+	{
+		"beneficios_estilo": "Aumenta control de cadera, resistencia y confianza corporal.",
+		"descripcion_estilo": "Técnica de caderas y aislamientos; niveles Basic/Inter/Pro y formatos de clase.",
+		"estado": true,
+		"id_estilo": 2,
+		"nombre_estilo": "Twerk"
+	}]
+
+    
+     """
+GET /estilos/{id}
+Obtiene un estilo específico
+    """
+http://localhost:5000/estilos/1
+
+Resultado: 
+{
+	"beneficios_estilo": "Mejora equilibrio, líneas y presencia escénica, refuerza core y glúteos.",
+	"descripcion_estilo": "Técnica y coreografía en tacones.",
+	"estado": true,
+	"id_estilo": 1,
+	"nombre_estilo": "Heels"
+}
+
+
+    
+     """
+     PUT /estilos/{id}
+Actualiza un estilo
+
+    """
+
+
+
+    
+     """
+DELETE /estilos/{id}
+Elimina un estilo (borrado lógico)
+
+    """
+
+
+
+
+`GET /ciclos/active`
+Obtiene todos los ciclos activos
+
+ `GET /ciclos/{id}`
+Obtiene un ciclo específico
+
+ `POST /ciclos/`
+Crea un nuevo ciclo
+
+{
+  "nombre": "Ciclo 2025",
+  "inicio": "2025-01-15",
+  "fin": "2025-12-15"
+}
+
+
+ `PUT /ciclos/{id}`
+Actualiza un ciclo
+
+ `DELETE /ciclos/{id}`
+Elimina un ciclo (borrado lógico)
+
+
+
+
+    
+     """
+
+    """
+
+
+
+    
+     """
+
+    """
+
+
+
+    
+     """
+
+    """
+
+
+
+    
+     """
+
+    """
+
+
+
+    
+     """
+
+    """
+
+
+
+    
+     """
+
+    """
+
+
+
+    
+     """
+
+    """
+
+
+
+    
+     """
+
+    """
+
+
+
+    
+     """
+
+    """
+
+
+
+    
+     """
+
+    """
+
+
+
+    
