@@ -83,6 +83,7 @@ class PromocionService:
         - tiene_sorteo: boolean
         - cantidad_premios: int (requerido si tiene_sorteo=true)
         - premios: array de floats (opcional - ej: [25.0, 20.0, 15.0])
+        - cantidad_beneficiarios: int (opcional - número máximo de beneficiarios)
         """
         try:
             # Validaciones requeridas
@@ -130,6 +131,7 @@ class PromocionService:
             # Valores por defecto
             promocion_data.setdefault('aplica_nuevos_usuarios', True)
             promocion_data.setdefault('estado', True)
+            promocion_data.setdefault('cantidad_beneficiarios', None)
             
             # Remover activo del POST si viene (no se puede enviar, se genera automáticamente)
             promocion_data.pop('activo', None)

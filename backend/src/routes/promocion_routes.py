@@ -222,7 +222,9 @@ def create_promocion():
         "publico_objetivo": "Todos",
         "img": "/uploads/promociones/promo_987f6543-e21c-45d6-b789-123456789abc.png",
         "tiene_sorteo": true,
-        "cantidad_premios": 5,
+        "cantidad_premios": 2,
+        "premios": [25.0, 20.0],
+        "cantidad_beneficiarios": 100,
         "aplica_nuevos_usuarios": false
     }
     

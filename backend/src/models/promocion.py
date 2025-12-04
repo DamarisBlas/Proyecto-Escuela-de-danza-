@@ -28,7 +28,8 @@ class Promocion(db.Model):
     estado = Column(Boolean, nullable=False)
     
     # Aumentado: ahora soporta números más grandes
-    cantidad_beneficiarios = Column(BigInteger, nullable=True)
+    cantidad_beneficiarios = Column(Integer, nullable=True)
+    cantidad_beneficiarios_inscritos = Column(Integer, nullable=True, default=0)
 
     def to_dict(self):
         return {
@@ -48,4 +49,5 @@ class Promocion(db.Model):
             'activo': self.activo,
             'estado': self.estado,
             'cantidad_beneficiarios': int(self.cantidad_beneficiarios) if self.cantidad_beneficiarios is not None else None,
+            'cantidad_beneficiarios_inscritos': int(self.cantidad_beneficiarios_inscritos) if self.cantidad_beneficiarios_inscritos is not None else 0,
         }
