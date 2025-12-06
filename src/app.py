@@ -15,7 +15,7 @@ def create_app():
     app.config.from_object(Config)
     app.url_map.strict_slashes = False
 
-    CORS(app, origins=["http://localhost:5173", "http://localhost:3000","http://localhost:5174","http://localhost:5175"],
+    CORS(app, origins=["http://localhost:5173", "http://localhost:3000","http://localhost:5174","http://localhost:5175", "https://proyecto-escuela-de-danza.vercel.app/"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
          allow_headers=["Content-Type", "Authorization"],
          supports_credentials=True)
@@ -39,6 +39,10 @@ def create_app():
     
     # Import models so Flask-Migrate can detect them
     from . import models
+    
+     # CREAR TABLAS EN LA BD REMOTA (bloque temporal)
+    with app.app_context():
+        db.create_all()
     
     # Register routes
     from .routes import register_routes
