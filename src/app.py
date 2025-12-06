@@ -15,22 +15,13 @@ def create_app():
     app.config.from_object(Config)
     app.url_map.strict_slashes = False
 
-    CORS(app, origins=[ "Access-Control-Allow-Origin","http://localhost:5173","http://localhost:5174","http://localhost:5175", "https://proyecto-escuela-de-danza.vercel.app/"],
+    CORS(app, origins=["http://localhost:5173", "http://localhost:3000","http://localhost:5174","http://localhost:5175", "https://proyecto-escuela-de-danza.vercel.app/", "https://proyecto-escuela-de-danza-16kygqk99.vercel.app"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
          allow_headers=["Content-Type", "Authorization"],
          supports_credentials=True)
-    
-    @app.before_request
-    def handle_preflight():
-        from flask import request
-        if request.method == "OPTIONS":
-            from flask import make_response
-            response = make_response()
-            response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
-            response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-            response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-            response.headers.add("Access-Control-Allow-Credentials", "true")
-            return response
+  
+  
+ 
 
 
 
