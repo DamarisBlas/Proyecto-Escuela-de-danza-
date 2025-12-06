@@ -4,9 +4,10 @@ from datetime import datetime
 
 class Persona(db.Model):
     __tablename__ = 'Persona'
-    id_persona = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_persona = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(50), nullable=False)
-    apellido = Column(String(50), nullable=True)
+    apellido_paterno = Column(String(50), nullable=True)
+    apellido_materno = Column(String(50), nullable=True)
     email = Column(String(50), nullable=True)
     celular = Column(String(50), nullable=True)
     password = Column(Text, nullable=True)
@@ -21,7 +22,8 @@ class Persona(db.Model):
         return {
             'id_persona': self.id_persona,
             'nombre': self.nombre,
-            'apellido': self.apellido,
+            'apellido_paterno': self.apellido_paterno,
+            'apellido_materno': self.apellido_materno,
             'email': self.email,
             'celular': self.celular,
             'fecha_creacion': self.fecha_creacion.isoformat() if self.fecha_creacion else None,

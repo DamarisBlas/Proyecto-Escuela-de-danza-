@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, Time, Boolean, ForeignKey, Numeric, BigI
 
 class HorarioSesion(db.Model):
     __tablename__ = 'HorarioSesion'
-    id_horario_sesion = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_horario_sesion = Column(Integer, primary_key=True, autoincrement=True)
     Horario_id_horario = Column(Integer, ForeignKey('Horario.id_horario'), nullable=False)
     dia = Column(Integer, nullable=False)
     hora_inicio = Column(Time, nullable=False)
@@ -17,6 +17,10 @@ class HorarioSesion(db.Model):
     
     capacidad_maxima = Column(Integer, nullable=False)
     cupos_ocupados = Column(Integer, nullable=False, default=0)
+    
+    es_reposicion = Column(Boolean, nullable=True, default=False)
+    sesion_original_id = Column(Integer, ForeignKey('HorarioSesion.id_horario_sesion'), nullable=True)
+    
     
     def __repr__(self):
         return f"<HorarioSesion {self.id_horario_sesion} horario={self.Horario_id_horario}>"
@@ -35,5 +39,8 @@ class HorarioSesion(db.Model):
             'estado': self.estado,
             'capacidad_maxima': self.capacidad_maxima,
             'cupos_ocupados': self.cupos_ocupados,
-            'cupos_disponibles': self.capacidad_maxima - self.cupos_ocupados
+            'cupos_disponibles': self.capacidad_maxima - self.cupos_ocupados,
+            'es_reposicion': self.es_reposicion,
+            'sesion_original_id': self.sesion_original_id,
+           
         }

@@ -5,8 +5,8 @@ from src.app import db
 class Promocion(db.Model):
     __tablename__ = 'Promocion'
 
-    id_promocion = Column(BigInteger, primary_key=True)
-    Oferta_id_oferta = Column(BigInteger, ForeignKey('Oferta.id_oferta'), nullable=False)
+    id_promocion = Column(Integer, primary_key=True)
+    Oferta_id_oferta = Column(Integer, ForeignKey('Oferta.id_oferta'), nullable=False)
 
     nombre_promocion = Column(String(50), nullable=False)
     descricpcion = Column(Text, nullable=True)  # mantengo el nombre tal como lo proporcionaste

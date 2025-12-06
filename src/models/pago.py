@@ -6,7 +6,7 @@ class Pago(db.Model):
     __tablename__ = 'Pago'
 
     id_pago = Column(Integer, primary_key=True)
-    Inscripcion_id_inscripcion = Column(BigInteger, ForeignKey('Inscripcion.id_inscripcion'), nullable=False)
+    Inscripcion_id_inscripcion = Column(Integer, ForeignKey('Inscripcion.id_inscripcion'), nullable=False)
     Metodo_pago_id_metodo_pago = Column(Integer, ForeignKey('Metodo_pago.id_metodo_pago'), nullable=False)
 
     numero_cuota = Column(Integer, nullable=False)

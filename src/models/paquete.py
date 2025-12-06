@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Numeric, BigInteger, Fo
 
 class Paquete(db.Model):
     __tablename__ = 'Paquete'
-    id_paquete = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_paquete = Column(Integer, primary_key=True, autoincrement=True)
     
     
     nombre = Column(String(50), nullable=False) 
@@ -14,7 +14,7 @@ class Paquete(db.Model):
 
     ilimitado = Column(Boolean, nullable=False, default=False)
     
-    Oferta_id_oferta = Column(BigInteger, ForeignKey('Oferta.id_oferta'), nullable=False)
+    Oferta_id_oferta = Column(Integer, ForeignKey('Oferta.id_oferta'), nullable=False)
     precio = Column(Numeric(10, 2), nullable=False)
    
     def __repr__(self):

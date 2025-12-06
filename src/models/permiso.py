@@ -8,18 +8,18 @@ class Permiso(db.Model):
     __tablename__ = 'Permiso'
     
     # Campos de la tabla (nombres en minúsculas como están en la BD)
-    permiso_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    persona_id_persona = Column('persona_id_persona', BigInteger, ForeignKey('Persona.id_persona'), nullable=False)
-    inscripcion_id_inscripcion = Column('inscripcion_id_inscripcion', BigInteger, ForeignKey('Inscripcion.id_inscripcion'), nullable=False)
-    asistencia_original_id = Column('asistencia_original_id', BigInteger, ForeignKey('Asistencia.id_asistencia'), nullable=False)
+    permiso_id = Column(Integer, primary_key=True, autoincrement=True)
+    persona_id_persona = Column('persona_id_persona', Integer, ForeignKey('Persona.id_persona'), nullable=False)
+    inscripcion_id_inscripcion = Column('inscripcion_id_inscripcion', Integer, ForeignKey('Inscripcion.id_inscripcion'), nullable=False)
+    asistencia_original_id = Column('asistencia_original_id', Integer, ForeignKey('Asistencia.id_asistencia'), nullable=False)
     motivo = Column(Text, nullable=False)
-    horario_sesion_id_horario_sesion = Column('horario_sesion_id_horario_sesion', BigInteger, ForeignKey('HorarioSesion.id_horario_sesion'), nullable=False)
+    horario_sesion_id_horario_sesion = Column('horario_sesion_id_horario_sesion', Integer, ForeignKey('HorarioSesion.id_horario_sesion'), nullable=False)
     fecha_solicitud = Column(DateTime, nullable=False, default=datetime.utcnow)
     estado_permiso = Column(String(30), nullable=False, default='PENDIENTE')
     motivo_rechazo = Column(Text, nullable=True)
     fecha_respuesta = Column(DateTime, nullable=True)
-    respondida_por = Column(BigInteger, ForeignKey('Persona.id_persona'), nullable=True)
-    asistencia_reemplazo_id = Column('asistencia_reemplazo_id', BigInteger, ForeignKey('Asistencia.id_asistencia'), nullable=True)
+    respondida_por = Column(Integer, ForeignKey('Persona.id_persona'), nullable=True)
+    asistencia_reemplazo_id = Column('asistencia_reemplazo_id', Integer, ForeignKey('Asistencia.id_asistencia'), nullable=True)
     activo = Column(Boolean, nullable=False, default=True)
     
     # Relaciones comentadas temporalmente para evitar conflictos

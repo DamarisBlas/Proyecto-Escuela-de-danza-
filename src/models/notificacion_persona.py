@@ -4,10 +4,10 @@ from sqlalchemy import Column, Integer, Boolean, DateTime, ForeignKey, BigIntege
 class NotificacionPersona(db.Model):
     __tablename__ = 'notificacion_persona'
     
-    id_notificacion_persona = Column(BigInteger, primary_key=True, autoincrement=True)
-    Notificacion_id_notificacion = Column(BigInteger, ForeignKey('notificacion.id_notificacion'), nullable=False)
-    Persona_id_persona = Column(BigInteger, ForeignKey('Persona.id_persona'), nullable=False)
-    Inscricpcion_id_inscricpcion = Column(BigInteger, ForeignKey('Inscripcion.id_inscripcion'), nullable=True)
+    id_notificacion_persona = Column(Integer, primary_key=True, autoincrement=True)
+    Notificacion_id_notificacion = Column(Integer, ForeignKey('notificacion.id_notificacion'), nullable=False)
+    Persona_id_persona = Column(Integer, ForeignKey('Persona.id_persona'), nullable=False)
+    Inscricpcion_id_inscricpcion = Column(Integer, ForeignKey('Inscripcion.id_inscripcion'), nullable=True)
     leida = Column(Boolean, nullable=False, default=False)
     fecha_leida = Column(DateTime, nullable=True)
     enviada_sistema = Column(Boolean, nullable=True, default=True)

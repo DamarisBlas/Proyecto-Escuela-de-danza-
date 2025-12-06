@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Date, Text, Boolean, ForeignKey,
 
 class Oferta(db.Model):
     __tablename__ = 'Oferta'
-    id_oferta = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_oferta = Column(Integer, primary_key=True, autoincrement=True)
     ciclo_id_ciclo = Column(Integer, ForeignKey('ciclo.id_ciclo'), nullable=False)
     Subcategoria_id_subcategoria = Column(Integer, ForeignKey('Subcategoria.id_subcategoria'), nullable=False)
     fecha_inicio = Column(Date, nullable=False)

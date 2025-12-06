@@ -5,10 +5,10 @@ from src.app import db
 class Inscripcion(db.Model):
     __tablename__ = 'Inscripcion'
 
-    id_inscripcion = Column(BigInteger, primary_key=True)
-    Persona_id_persona = Column(BigInteger, ForeignKey('Persona.id_persona'), nullable=False)
-    Paquete_id_paquete = Column(BigInteger, ForeignKey('Paquete.id_paquete'), nullable=False)
-    Promocion_id_promocion = Column(BigInteger, ForeignKey('Promocion.id_promocion'), nullable=True)
+    id_inscripcion = Column(Integer, primary_key=True)
+    Persona_id_persona = Column(Integer, ForeignKey('Persona.id_persona'), nullable=False)
+    Paquete_id_paquete = Column(Integer, ForeignKey('Paquete.id_paquete'), nullable=False)
+    Promocion_id_promocion = Column(Integer, ForeignKey('Promocion.id_promocion'), nullable=True)
 
     fecha_inscripcion = Column(Date, nullable=False)
     fecha_inicio = Column(Date, nullable=False)

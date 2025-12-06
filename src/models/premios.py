@@ -6,7 +6,7 @@ class Premio(db.Model):
     __tablename__ = 'Premios'
 
     id_premio = Column(Integer, primary_key=True)
-    Promocion_id_promocion = Column(BigInteger, ForeignKey('Promocion.id_promocion'), nullable=False)
+    Promocion_id_promocion = Column(Integer, ForeignKey('Promocion.id_promocion'), nullable=False)
 
     descuento = Column(Numeric(4, 2), nullable=False)
     estado = Column(Boolean, nullable=False)

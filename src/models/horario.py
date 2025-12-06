@@ -3,11 +3,11 @@ from sqlalchemy import Column, Integer, Time, Boolean, ForeignKey, Numeric, BigI
 
 class Horario(db.Model):
     __tablename__ = 'Horario'
-    id_horario = Column(BigInteger, primary_key=True, autoincrement=True)
+    id_horario = Column(Integer, primary_key=True, autoincrement=True)
     Oferta_id_oferta = Column(Integer, ForeignKey('Oferta.id_oferta'), nullable=False)
     Estilo_id_estilo = Column(Integer, ForeignKey('Estilo.id_estilo'), nullable=False)
     nivel = Column(Integer, nullable=False) #  1 Basico,2 Intermedio,3 Avanzado,4 Multinivel
-    Profesor_id_profesor = Column(Integer, ForeignKey('Profesor.id_profesor'), nullable=False)
+    Profesor_id_profesor = Column(Integer, ForeignKey('Profesor.Persona_id_persona'), nullable=False)
     Sala_id_sala = Column(Integer, ForeignKey('Sala.id_sala'), nullable=False)
     capacidad = Column(Integer, nullable=False)
     estado = Column(Boolean, nullable=False, default=True)

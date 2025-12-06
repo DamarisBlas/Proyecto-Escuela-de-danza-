@@ -5,7 +5,7 @@ from src.models.ciclo import Ciclo
 from src.models.subcategoria import Subcategoria
 from src.models.categoria import Categoria
 from src.models.programa import Programa
-from src.models.sesion import Sesion
+from src.models.horario_sesion import HorarioSesion
 from src.models.inscripcion import Inscripcion
 from src.app import db
 from sqlalchemy.orm import joinedload
@@ -182,8 +182,8 @@ class OfertaRepository:
             oferta_dict['horarios'] = horarios_completos
 
             # Contar sesiones totales de la oferta (a través de horarios)
-            sesiones_count = db.session.query(func.count(Sesion.id_sesion)).join(
-                Horario, Sesion.Horario_id_horario == Horario.id_horario
+            sesiones_count = db.session.query(func.count(HorarioSesion.id_horario_sesion)).join(
+                Horario, HorarioSesion.Horario_id_horario == Horario.id_horario
             ).filter(Horario.Oferta_id_oferta == oferta_id).scalar() or 0
             oferta_dict['sesiones_count'] = sesiones_count
 

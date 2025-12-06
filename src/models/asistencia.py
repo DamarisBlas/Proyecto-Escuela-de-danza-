@@ -1,15 +1,15 @@
-from sqlalchemy import Column, BigInteger, Boolean, Date, ForeignKey
+from sqlalchemy import Column, Integer, Boolean, Date, ForeignKey
 from src.app import db
 
 
 class Asistencia(db.Model):
     __tablename__ = 'Asistencia'
 
-    id_asistencia = Column(BigInteger, primary_key=True)
+    id_asistencia = Column(Integer, primary_key=True)
     # FK to Inscripcion (table `Inscripcion`, pk `id_inscripcion`)
-    Inscripcion_id_inscripcion = Column(BigInteger, ForeignKey('Inscripcion.id_inscripcion'), nullable=False)
+    Inscripcion_id_inscripcion = Column(Integer, ForeignKey('Inscripcion.id_inscripcion'), nullable=False)
     # FK to HorarioSesion (table `HorarioSesion`, pk `id_horario_sesion`)
-    Horario_sesion_id_horario_sesion = Column(BigInteger, ForeignKey('HorarioSesion.id_horario_sesion'), nullable=False)
+    Horario_sesion_id_horario_sesion = Column(Integer, ForeignKey('HorarioSesion.id_horario_sesion'), nullable=False)
 
     asistio = Column(Boolean, nullable=True)
     fecha = Column(Date, nullable=True)

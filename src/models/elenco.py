@@ -3,8 +3,8 @@ from sqlalchemy import Column, Integer, String, Date, Text, Boolean, ForeignKey,
 
 class Elenco(db.Model):
     __tablename__ = 'Elenco'
-    id_elenco = Column(Integer, primary_key=True, autoincrement=True)
-    Persona_id_persona = Column(BigInteger, ForeignKey('Persona.id_persona'), nullable=False)
+  
+    Persona_id_persona = Column(Integer, ForeignKey('Persona.id_persona'),primary_key=True, nullable=False)
     departamento = Column(String(20), nullable=True)
     cumpleanos = Column(Date, nullable=True)
     signo = Column(String(30), nullable=False)
@@ -12,4 +12,4 @@ class Elenco(db.Model):
     estado = Column(Boolean, nullable=False, default=True)
 
     def __repr__(self):
-        return f"<Elenco {self.id_elenco} persona={self.Persona_id_persona}>"
+        return f"<Elenco persona={self.Persona_id_persona}>"

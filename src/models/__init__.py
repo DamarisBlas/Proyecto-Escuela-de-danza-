@@ -6,11 +6,11 @@ from .oferta import Oferta
 from .paquete import Paquete
 from .persona import Persona
 from .profesor import Profesor
+from .profesor_estilo import ProfesorEstilo
 from .alumno import Alumno
 from .director import Director
 from .programa import Programa
 from .sala import Sala
-from .sesion import Sesion
 from .subcategoria import Subcategoria
 from .ciclo import Ciclo
 from .elenco import Elenco
@@ -27,7 +27,6 @@ from .permiso import Permiso
 
 __all__ = [
 	'Categoria', 'Estilo', 'Horario', 'HorarioSesion', 'Oferta', 'Paquete',
-	'Persona', 'Profesor', 'Alumno', 'Director', 'Programa', 'Sala', 'Sesion', 'Subcategoria', 'Ciclo',
-	'Elenco', 'AlumnoFemme'
-		, 'Inscripcion', 'Promocion', 'Asistencia', 'Premio', 'MetodoPago', 'Pago', 'Notificacion', 'NotificacionPersona', 'Permiso'
+	'Persona', 'Profesor', 'ProfesorEstilo', 'Alumno', 'Director', 'Programa', 'Sala', 'Subcategoria', 'Ciclo',
+	'Elenco', 'AlumnoFemme', 'Inscripcion', 'Promocion', 'Asistencia', 'Premio', 'MetodoPago', 'Pago', 'Notificacion', 'NotificacionPersona', 'Permiso'
 ]
