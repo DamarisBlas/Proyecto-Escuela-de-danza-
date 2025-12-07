@@ -12,9 +12,9 @@ def create_director():
         data = request.get_json()
         
         # Validar datos requeridos
-        required_fields = ['nombre', 'apellido', 'email', 'password']
+        required_fields = ['nombre', 'email', 'password']
         if not data or not all(field in data for field in required_fields):
-            return jsonify({"error": "Nombre, apellido, email y password son requeridos"}), 400
+            return jsonify({"error": "Nombre, email y password son requeridos"}), 400
         
         # Crear director
         result, status_code = DirectorService.create_director(data)

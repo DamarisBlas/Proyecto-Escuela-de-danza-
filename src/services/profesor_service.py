@@ -22,11 +22,11 @@ class ProfesorService:
                     "frase": profesor.frase,
                     "descripcion": profesor.descripcion,
                     "redes_sociales": profesor.redes_sociales,
-                    "cuidad": profesor.cuidad,
-                    "experiencia": profesor.experiencia,
+                    "pais_origen": profesor.pais_origen,
+                    "cuando_comenzo_danza": profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
                     "signo": profesor.signo,
                     "musica": profesor.musica,
-                    "estilos": profesor.estilos,
+                    
                     "temporal": persona.temporal,
                     "estado": profesor.estado
                 })
@@ -56,11 +56,11 @@ class ProfesorService:
                     "frase": profesor.frase,
                     "descripcion": profesor.descripcion,
                     "redes_sociales": profesor.redes_sociales,
-                    "cuidad": profesor.cuidad,
-                    "experiencia": profesor.experiencia,
+                    "pais_origen": profesor.pais_origen,
+                    "cuando_comenzo_danza": profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
                     "signo": profesor.signo,
                     "musica": profesor.musica,
-                    "estilos": profesor.estilos,
+                    
                     "temporal": persona.temporal,
                     "estado": profesor.estado
                 })
@@ -90,11 +90,11 @@ class ProfesorService:
                     "frase": profesor.frase,
                     "descripcion": profesor.descripcion,
                     "redes_sociales": profesor.redes_sociales,
-                    "cuidad": profesor.cuidad,
-                    "experiencia": profesor.experiencia,
+                    "pais_origen": profesor.pais_origen,
+                    "cuando_comenzo_danza": profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
                     "signo": profesor.signo,
                     "musica": profesor.musica,
-                    "estilos": profesor.estilos,
+                    
                     "temporal": persona.temporal,
                     "estado": profesor.estado
                 })
@@ -124,11 +124,11 @@ class ProfesorService:
                 "frase": profesor.frase,
                 "descripcion": profesor.descripcion,
                 "redes_sociales": profesor.redes_sociales,
-                "cuidad": profesor.cuidad,
-                "experiencia": profesor.experiencia,
+                "pais_origen": profesor.pais_origen,
+                "cuando_comenzo_danza": profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
                 "signo": profesor.signo,
                 "musica": profesor.musica,
-                "estilos": profesor.estilos,
+                
                 "temporal": persona.temporal,
                 "estado": profesor.estado
             }
@@ -170,7 +170,7 @@ class ProfesorService:
                 'experiencia': data.get('experiencia'),
                 'signo': data.get('signo'),
                 'musica': data.get('musica'),
-                'estilos': data.get('estilos'),
+                
                 'estado': True  # Profesor activo
             }
             
@@ -183,13 +183,13 @@ class ProfesorService:
                     "nombre": persona.nombre,
                     "apellido": persona.apellido,
                     "redes_sociales": profesor.redes_sociales,
-                    "cuidad": profesor.cuidad,
-                    "experiencia": profesor.experiencia,
+                    "pais_origen": profesor.pais_origen,
+                    "cuando_comenzo_danza": profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
                     "frase": profesor.frase,
                     "descripcion": profesor.descripcion,
                     "signo": profesor.signo,
                     "musica": profesor.musica,
-                    "estilos": profesor.estilos,
+                    
                     "temporal": True,
                     "estado": True
                 }
@@ -226,7 +226,7 @@ class ProfesorService:
             # Actualizar datos de profesor
             profesor_updates = {}
             campos_profesor = ['frase', 'descripcion', 'redes_sociales', 'cuidad', 
-                              'experiencia', 'signo', 'musica', 'estilos']
+                              'pais_origen', 'cuando_comenzo_danza', 'signo', 'musica']
             
             for campo in campos_profesor:
                 if campo in data:
@@ -250,11 +250,11 @@ class ProfesorService:
                     "frase": profesor_updated.frase,
                     "descripcion": profesor_updated.descripcion,
                     "redes_sociales": profesor_updated.redes_sociales,
-                    "cuidad": profesor_updated.cuidad,
-                    "experiencia": profesor_updated.experiencia,
+                    "pais_origen": profesor_updated.pais_origen,
+                    "cuando_comenzo_danza": profesor_updated.cuando_comenzo_danza.isoformat() if profesor_updated.cuando_comenzo_danza else None,
                     "signo": profesor_updated.signo,
                     "musica": profesor_updated.musica,
-                    "estilos": profesor_updated.estilos,
+                    
                     "temporal": persona_updated.temporal,
                     "estado": profesor_updated.estado
                 }
@@ -313,11 +313,11 @@ class ProfesorService:
                 "frase": profesor.frase,
                 "descripcion": profesor.descripcion,
                 "redes_sociales": profesor.redes_sociales,
-                "cuidad": profesor.cuidad,
-                "experiencia": profesor.experiencia,
+                "pais_origen": profesor.pais_origen,
+                "cuando_comenzo_danza": profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
                 "signo": profesor.signo,
                 "musica": profesor.musica,
-                "estilos": profesor.estilos,
+                
                 "estado": profesor.estado
             }
             

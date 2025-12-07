@@ -29,7 +29,8 @@ class AuthService:
             "user": {
                 "id": persona.id_persona,
                 "nombre": persona.nombre,
-                "apellido": persona.apellido,
+                "apellido_paterno": persona.apellido_paterno,
+                "apellido_materno": persona.apellido_materno,
                 "email": persona.email,
                 "celular": persona.celular,
                 "solicitud_user_especial": persona.solicitud_user_especial,
@@ -49,7 +50,7 @@ class AuthService:
             return {
                 "role": "alumno",
                 "data": {
-                    "id_alumno": alumno.id_alumno,
+                    "Persona_id_persona": alumno.Persona_id_persona,
                     "departamento": alumno.departamento,                      
                     "estado": alumno.estado
                 }
@@ -61,7 +62,7 @@ class AuthService:
             return {
                 "role": "alumno_femme",
                 "data": {
-                    "id_alumno_femme": alumno_femme.id_alumno_femme,
+                    "Persona_id_persona": alumno_femme.Persona_id_persona,
                     "departamento": alumno_femme.departamento,
                     "cumpleanos": alumno_femme.cumpleanos.isoformat() if alumno_femme.cumpleanos else None,
                     "signo": alumno_femme.signo,
@@ -75,15 +76,14 @@ class AuthService:
             return {
                 "role": "profesor",
                 "data": {
-                    "id_profesor": profesor.id_profesor,
+                    "Persona_id_persona": profesor.Persona_id_persona,
                     "frase": profesor.frase,
                     "descripcion": profesor.descripcion,
                     "redes_sociales": profesor.redes_sociales,
-                    "cuidad": profesor.cuidad,  
-                    "experiencia": profesor.experiencia,
+                    "pais_origen": profesor.pais_origen,
+                    "cuando_comenzo_danza": profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
                     "signo": profesor.signo,
                     "musica": profesor.musica,
-                    "estilos": profesor.estilos,
                     "estado": profesor.estado
                 }
             }
@@ -94,8 +94,8 @@ class AuthService:
             return {
                 "role": "director",
                 "data": {
-                    "id_director": director.id_director,
-                     "departamento": director.departamento,
+                    "Persona_id_persona": director.Persona_id_persona,
+                    "departamento": director.departamento,
                     "estado": director.estado
                 }
             }
@@ -106,7 +106,7 @@ class AuthService:
             return {
                 "role": "elenco",
                 "data": {
-                    "id_elenco": elenco.id_elenco,
+                    "Persona_id_persona": elenco.Persona_id_persona,
                     "departamento": elenco.departamento,
                     "cumpleanos": elenco.cumpleanos.isoformat() if elenco.cumpleanos else None,
                     "signo": elenco.signo,

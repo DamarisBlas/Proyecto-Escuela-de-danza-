@@ -29,7 +29,8 @@ def get_all_personas():
     Obtiene todas las personas con campos específicos:
     - id_persona
     - nombre
-    - apellido
+    - apellido_paterno
+    - apellido_materno
     - email
     - celular
     - fecha_creacion
@@ -48,7 +49,8 @@ def update_persona(persona_id):
     
     Campos permitidos para actualizar:
     - nombre (requerido)
-    - apellido
+    - apellido_paterno
+    - apellido_materno
     - email (debe ser único)
     - celular
     - solicitud_user_especial

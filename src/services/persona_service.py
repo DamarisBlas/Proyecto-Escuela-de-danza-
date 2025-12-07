@@ -24,7 +24,8 @@ class PersonaService:
                 persona_dict = {
                     'id_persona': persona.id_persona,
                     'nombre': persona.nombre,
-                    'apellido': persona.apellido,
+                    'apellido_paterno': persona.apellido_paterno,
+                    'apellido_materno': persona.apellido_materno,
                     'email': persona.email,
                     'celular': persona.celular,
                     'fecha_creacion': persona.fecha_creacion.isoformat() if persona.fecha_creacion else None,
@@ -52,7 +53,8 @@ class PersonaService:
             persona_dict = {
                 'id_persona': persona.id_persona,
                 'nombre': persona.nombre,
-                'apellido': persona.apellido,
+                'apellido_paterno': persona.apellido_paterno,
+                    'apellido_materno': persona.apellido_materno,
                 'email': persona.email,
                 'celular': persona.celular,
                 'fecha_creacion': persona.fecha_creacion.isoformat() if persona.fecha_creacion else None,
@@ -78,7 +80,7 @@ class PersonaService:
 
             # Campos permitidos para actualizar (excluir campos sensibles)
             campos_permitidos = [
-                'nombre', 'apellido', 'email', 'celular',
+                'nombre', 'apellido_paterno', 'apellido_materno', 'email', 'celular',
                 'solicitud_user_especial', 'estado', 'tipo_cuenta', 'temporal'
             ]
 
@@ -138,11 +140,10 @@ class PersonaService:
                     frase=None,
                     descripcion=None,
                     redes_sociales=None,
-                    cuidad=None,
-                    experiencia=None,
+                    pais_origen=None,
+                    cuando_comenzo_danza=None,
                     signo=None,
                     musica=None,
-                    estilos=None,
                     estado=True  # Activar al profesor por defecto
                 )
                 db.session.add(nuevo_profesor)
@@ -163,7 +164,8 @@ class PersonaService:
                 "persona": {
                     'id_persona': persona_actualizada.id_persona,
                     'nombre': persona_actualizada.nombre,
-                    'apellido': persona_actualizada.apellido,
+                    'apellido_paterno': persona_actualizada.apellido_paterno,
+                    'apellido_materno': persona_actualizada.apellido_materno,
                     'email': persona_actualizada.email,
                     'celular': persona_actualizada.celular,
                     'fecha_creacion': persona_actualizada.fecha_creacion.isoformat() if persona_actualizada.fecha_creacion else None,
@@ -198,7 +200,8 @@ class PersonaService:
             persona_dict = {
                 'id_persona': persona.id_persona,
                 'nombre': persona.nombre,
-                'apellido': persona.apellido,
+                'apellido_paterno': persona.apellido_paterno,
+                'apellido_materno': persona.apellido_materno,
                 'email': persona.email,
                 'celular': persona.celular,
                 'fecha_creacion': persona.fecha_creacion.isoformat() if persona.fecha_creacion else None,
@@ -216,15 +219,14 @@ class PersonaService:
                 profesor = db.session.query(Profesor).filter_by(Persona_id_persona=persona_id).first()
                 if profesor:
                     role_data = {
-                        'id_profesor': profesor.id_profesor,
+                        'Persona_id_persona': profesor.Persona_id_persona,
                         'frase': profesor.frase,
                         'descripcion': profesor.descripcion,
                         'redes_sociales': profesor.redes_sociales,
-                        'cuidad': profesor.cuidad,
-                        'experiencia': profesor.experiencia,
+                        'pais_origen': profesor.pais_origen,
+                        'cuando_comenzo_danza': profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
                         'signo': profesor.signo,
                         'musica': profesor.musica,
-                        'estilos': profesor.estilos,
                         'estado_rol': profesor.estado
                     }
             
@@ -232,7 +234,7 @@ class PersonaService:
                 alumno = db.session.query(Alumno).filter_by(Persona_id_persona=persona_id).first()
                 if alumno:
                     role_data = {
-                        'id_alumno': alumno.id_alumno,
+                        'Persona_id_persona': alumno.Persona_id_persona,
                         'departamento': alumno.departamento,
                         'estado_rol': alumno.estado
                     }
@@ -241,7 +243,7 @@ class PersonaService:
                 alumno_femme = db.session.query(AlumnoFemme).filter_by(Persona_id_persona=persona_id).first()
                 if alumno_femme:
                     role_data = {
-                        'id_alumno_femme': alumno_femme.id_alumno_femme,
+                        'Persona_id_persona': alumno_femme.Persona_id_persona,
                         'cumpleanos': alumno_femme.cumpleanos.isoformat() if alumno_femme.cumpleanos else None,
                         'signo': alumno_femme.signo,
                         'departamento': alumno_femme.departamento,
@@ -252,7 +254,7 @@ class PersonaService:
                 elenco = db.session.query(Elenco).filter_by(Persona_id_persona=persona_id).first()
                 if elenco:
                     role_data = {
-                        'id_elenco': elenco.id_elenco,
+                        'Persona_id_persona': elenco.Persona_id_persona,
                         'departamento': elenco.departamento,
                         'cumpleanos': elenco.cumpleanos.isoformat() if elenco.cumpleanos else None,
                         'signo': elenco.signo,
@@ -264,7 +266,7 @@ class PersonaService:
                 director = db.session.query(Director).filter_by(Persona_id_persona=persona_id).first()
                 if director:
                     role_data = {
-                        'id_director': director.id_director,
+                        'Persona_id_persona': director.Persona_id_persona,
                         'departamento': director.departamento,
                         'estado_rol': director.estado
                     }

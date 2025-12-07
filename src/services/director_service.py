@@ -18,7 +18,8 @@ class DirectorService:
             # Crear nueva persona
             nueva_persona = Persona(
                 nombre=director_data['nombre'],
-                apellido=director_data['apellido'],
+                apellido_paterno=director_data.get('apellido_paterno'),
+                apellido_materno=director_data.get('apellido_materno'),
                 email=director_data['email'],
                 celular=director_data.get('celular'),
                 password=generate_password_hash(director_data['password']),
@@ -43,9 +44,10 @@ class DirectorService:
                 "message": "Director creado exitosamente",
                 "director": {
                     "id_persona": nueva_persona.id_persona,
-                    "id_director": nuevo_director.id_director,
+                    "Persona_id_persona": nuevo_director.Persona_id_persona,
                     "nombre": nueva_persona.nombre,
-                    "apellido": nueva_persona.apellido,
+                    "apellido_paterno": nueva_persona.apellido_paterno,
+                    "apellido_materno": nueva_persona.apellido_materno,
                     "email": nueva_persona.email,
                     "celular": nueva_persona.celular,
                     "departamento": nuevo_director.departamento,
