@@ -8,7 +8,7 @@ import datetime
 class UserService:
     @staticmethod
     def _validate_payload(data: dict):
-        required = ['nombre', 'apellido', 'email', 'password', 'celular']
+        required = ['nombre', 'email', 'password', 'celular']
         missing = [f for f in required if not data.get(f)]
         if missing:
             raise ValueError(f"Missing required fields: {', '.join(missing)}")
@@ -34,7 +34,8 @@ class UserService:
 
         user_data = {
             'nombre': data['nombre'],
-            'apellido': data['apellido'],
+            'apellido_paterno': data.get('apellido_paterno'),
+            'apellido_materno': data.get('apellido_materno'),
             'email': data['email'],
             'celular': data['celular'],
             'password': hashed_password,
