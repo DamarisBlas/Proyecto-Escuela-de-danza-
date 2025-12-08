@@ -9,10 +9,10 @@ export type Instructor = {
   instagram?: string | null
   frase?: string | null
   descripcion?: string | null
-  ciudad?: string | null
+  pais_origen?: string | null
   signo?: string | null
-  musica_favorita?: string | null
-  experiencia?: string | null
+  musica?: string | null
+  cuando_comenzo_danza?: string | null
 }
 
 export type Sala = {

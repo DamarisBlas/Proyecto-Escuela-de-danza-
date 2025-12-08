@@ -14,7 +14,8 @@ export interface AsistenciaConAlumno extends Asistencia {
   alumno: {
     id_persona: number
     nombre: string
-    apellido: string
+    apellido_paterno: string
+    apellido_materno: string
     email: string
   }
   inscripcion: {
@@ -46,18 +47,18 @@ export interface Sesion {
     beneficios_estilo: string
   }
   profesor: {
-    id_profesor: number
+    Persona_id_persona: number
     nombre: string
-    apellido: string
+    apellido_paterno: string
+    apellido_materno: string
     email: string
     celular: string
-    ciudad: string
-    experiencia: number
+    pais_origen: string
+    cuando_comenzo_danza: string
     frase: string
     descripcion: string | null
-    musica_favorita: string | null
+    musica: string | null
     signo: string | null
-    estilos: any
     redes_sociales: any
   }
   sala: {
@@ -95,14 +96,13 @@ export interface SesionesResponse {
 // ================= NEW INTERFACES FOR PROFESSOR ENDPOINTS =================
 
 export interface ProfesorInfo {
-  cuidad: string
+  pais_origen: string
   descripcion: string | null
   es_profesor: boolean
   estado: boolean
-  estilos: any
-  experiencia: number
+  cuando_comenzo_danza: string
   frase: string
-  id_profesor: number
+  Persona_id_persona: number
   musica: string | null
   persona_id: number
   redes_sociales: string
@@ -238,7 +238,8 @@ export interface InscritoDetalle {
     precio_original: number
   }
   persona: {
-    apellido: string
+    apellido_paterno: string
+    apellido_materno: string
     celular: string
     email: string
     estado: boolean

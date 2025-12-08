@@ -1,16 +1,16 @@
 import { api } from '@lib/api'
 
 export interface PersonaDetalleResponse {
-  apellido: string
+  apellido_paterno: string
+  apellido_materno: string
   celular: string | null
   datos_rol?: {
-    cuidad?: string | null // backend typo: 'cuidad'
+    pais_origen?: string | null
     descripcion?: string | null
     estado_rol?: boolean
-    estilos?: string | null
-    experiencia?: number | null
+    cuando_comenzo_danza?: string | null
     frase?: string | null
-    id_profesor?: number | null
+    Persona_id_persona?: number | null
     musica?: string | null
     redes_sociales?: string | null
     signo?: string | null

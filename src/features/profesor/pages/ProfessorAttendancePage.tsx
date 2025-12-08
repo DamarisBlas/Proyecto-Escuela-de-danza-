@@ -12,7 +12,8 @@ type TipoHorario = "weekly" | "single"
 type Alumna = {
   id_persona: number
   nombre: string
-  apellido: string
+  apellido_paterno: string
+  apellido_materno: string
   email: string
 }
 
@@ -122,9 +123,9 @@ export default function ProfessorAttendancePage() {
 
   // Query para obtener horarios del profesor
   const { data: horariosData, isLoading: loadingHorarios } = useQuery({
-    queryKey: ['horarios-profesor', profesorInfo?.id_profesor],
-    queryFn: () => fetchHorariosByProfesor(profesorInfo!.id_profesor),
-    enabled: !!profesorInfo?.id_profesor,
+    queryKey: ['horarios-profesor', profesorInfo?.Persona_id_persona],
+    queryFn: () => fetchHorariosByProfesor(profesorInfo!.Persona_id_persona),
+    enabled: !!profesorInfo?.Persona_id_persona,
   })
 
   // Inicializar horarios filtrados cuando se cargan los datos
@@ -269,7 +270,8 @@ export default function ProfessorAttendancePage() {
       alumno: {
         id_persona: inscrito.persona.id_persona,
         nombre: inscrito.persona.nombre,
-        apellido: inscrito.persona.apellido,
+        apellido_paterno: inscrito.persona.apellido_paterno,
+        apellido_materno: inscrito.persona.apellido_materno,
         email: inscrito.persona.email
       },
       // Ahora incluimos la información de inscripción
@@ -488,7 +490,7 @@ export default function ProfessorAttendancePage() {
                     {todosInscritosData.inscritos.map((inscrito, index) => (
                       <tr key={`${inscrito.persona.id_persona}-${index}`} className="odd:bg-white even:bg-slate-50">
                         <Td className="w-10 text-slate-500">{index + 1}</Td>
-                        <Td className="font-medium text-slate-900">{inscrito.persona.nombre} {inscrito.persona.apellido}</Td>
+                        <Td className="font-medium text-slate-900">{inscrito.persona.nombre} {inscrito.persona.apellido_paterno} {inscrito.persona.apellido_materno}</Td>
                         <Td className="text-slate-700">{inscrito.persona.email}</Td>
                         <Td className="text-slate-600">
                           {fmtDMY(inscrito.horario_sesion.fecha)} 
@@ -580,7 +582,7 @@ export default function ProfessorAttendancePage() {
                     {asistenciasConCambios.map((a, idx) => (
                       <tr key={a.id_asistencia} className="odd:bg-white even:bg-slate-50">
                         <Td className="w-10 text-slate-500">{idx + 1}</Td>
-                        <Td className="font-medium text-slate-900">{a.alumno.nombre} {a.alumno.apellido}</Td>
+                        <Td className="font-medium text-slate-900">{a.alumno.nombre} {a.alumno.apellido_paterno} {a.alumno.apellido_materno}</Td>
                         <Td className="text-center">
                           <label className="inline-flex cursor-pointer items-center gap-2">
                             <input
@@ -603,7 +605,7 @@ export default function ProfessorAttendancePage() {
                 <ul className="divide-y">
                   {asistenciasConCambios.map((a, idx) => (
                     <li key={a.id_asistencia} className="flex items-center justify-between py-2">
-                      <span className="text-sm font-medium text-slate-900">{idx + 1}. {a.alumno.nombre} {a.alumno.apellido}</span>
+                      <span className="text-sm font-medium text-slate-900">{idx + 1}. {a.alumno.nombre} {a.alumno.apellido_paterno} {a.alumno.apellido_materno}</span>
                       <label className="inline-flex cursor-pointer items-center gap-2">
                         <input
                           type="checkbox"

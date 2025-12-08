@@ -57,7 +57,7 @@ export function Table({ filteredHorarios, onSelectHorario, loading = false, erro
             return (
               <tr key={item.id_horario}>
                 <td className="font-medium">
-                  {item.profesor.persona.nombre} {item.profesor.persona.apellido}
+                  {item.profesor.persona.nombre} {item.profesor.persona.apellido_paterno} {item.profesor.persona.apellido_materno}
                 </td>
                 <td>
                   <span className="badge badge-rose">{item.estilo.nombre_estilo}</span>

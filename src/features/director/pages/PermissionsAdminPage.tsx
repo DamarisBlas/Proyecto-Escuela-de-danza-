@@ -38,7 +38,8 @@ interface BackendPermiso {
   persona: {
     id_persona: number;
     nombre: string;
-    apellido: string;
+    apellido_paterno: string;
+    apellido_materno: string;
     email: string;
     celular: string;
   };
@@ -84,7 +85,7 @@ function mapBackendToPermiso(backend: BackendPermiso): Permiso {
     id: backend.permiso_id.toString(),
     fecha,
     ciclo: backend.ciclo.nombre,
-    nombre: `${backend.persona.nombre} ${backend.persona.apellido}`,
+    nombre: `${backend.persona.nombre} ${backend.persona.apellido_paterno} ${backend.persona.apellido_materno}`.trim(),
     tipoAlumno: "Alumno", // TODO: Determinar si es Alumno Femme desde el backend
     programa: backend.oferta.nombre_oferta,
     tipoCurso: "Regular", // TODO: Determinar tipo de curso desde el backend

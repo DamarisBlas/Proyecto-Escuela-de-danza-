@@ -130,7 +130,8 @@ export default function EnrollmentsAdminPage(){
       const matchesOferta = !selectedOferta || horario.oferta.nombre_oferta === selectedOferta;
       const matchesSearch = !searchName ||
         horario.profesor.persona.nombre.toLowerCase().includes(searchName.toLowerCase()) ||
-        horario.profesor.persona.apellido.toLowerCase().includes(searchName.toLowerCase()) ||
+        horario.profesor.persona.apellido_paterno.toLowerCase().includes(searchName.toLowerCase()) ||
+        horario.profesor.persona.apellido_materno.toLowerCase().includes(searchName.toLowerCase()) ||
         horario.estilo.nombre_estilo.toLowerCase().includes(searchName.toLowerCase());
 
       return matchesCycle && matchesPrograma && matchesCategoria && matchesSubcategoria && matchesOferta && matchesSearch;
@@ -155,7 +156,8 @@ export default function EnrollmentsAdminPage(){
             const transformedStudents = data.inscritos.map((inscrito: any) => ({
               id: inscrito.persona.id_persona,
               nombre: inscrito.persona.nombre,
-              apellido: inscrito.persona.apellido,
+              apellido_paterno: inscrito.persona.apellido_paterno,
+              apellido_materno: inscrito.persona.apellido_materno,
               email: inscrito.persona.email,
               celular: inscrito.persona.celular,
               sesiones: inscrito.sesiones.map((sesion: any) => ({

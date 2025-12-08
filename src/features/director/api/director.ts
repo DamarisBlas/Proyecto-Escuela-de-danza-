@@ -7,16 +7,16 @@ async function tryOrMock<T>(call: () => Promise<T>, mock: T): Promise<T> {
 
 /** PROFESORES */
 export type ProfesorBackend = {
-  id_profesor: number
+  Persona_id_persona: number
   nombre: string
-  apellido: string
+  apellido_paterno: string
+  apellido_materno: string
   email: string
   celular: string
-  cuidad: string
+  pais_origen: string
   descripcion: string | null
   estado: boolean
-  estilos: any | null
-  experiencia: string | null
+  cuando_comenzo_danza: string | null
   frase: string | null
   musica: any | null
   redes_sociales: any | null
@@ -39,9 +39,9 @@ export async function fetchProfesores(): Promise<Profesor[]> {
     
     // Transformar la respuesta del backend al formato que usa el frontend
     return profesores.map((p: ProfesorBackend) => ({
-      id: p.id_profesor.toString(),
-      name: `${p.nombre} ${p.apellido || ''}`.trim(),
-      nationality: p.cuidad || 'No especificado',
+      id: p.Persona_id_persona.toString(),
+      name: `${p.nombre} ${p.apellido_paterno || ''} ${p.apellido_materno || ''}`.trim(),
+      nationality: p.pais_origen || 'No especificado',
       instagram: p.redes_sociales?.instagram || p.redes_sociales || '',
       temporal: p.temporal || false
     }))
@@ -53,16 +53,16 @@ export async function fetchProfesores(): Promise<Profesor[]> {
 
 export async function createProfesorTemporal(data: {
   nombre: string
-  cuidad: string
+  pais_origen: string
   redes_sociales: string
 }): Promise<Profesor> {
   const response = await api.post('/profesores/temporal', data)
   const p = response.data.profesor
   
   return {
-    id: p.id_profesor.toString(),
+    id: p.Persona_id_persona.toString(),
     name: p.nombre,
-    nationality: p.cuidad || 'No especificado',
+    nationality: p.pais_origen || 'No especificado',
     instagram: p.redes_sociales || '',
     temporal: true
   }

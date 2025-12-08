@@ -82,9 +82,9 @@ function getTeacherColor(idProfesor: number) {
 function getTeacherFullName(profesor: any) {
   // Soportar ambas estructuras: profesor.persona.nombre o profesor.nombre directamente
   if (profesor.persona) {
-    return `${profesor.persona.nombre.trim()} ${profesor.persona.apellido.trim()}`
+    return `${profesor.persona.nombre.trim()} ${profesor.persona.apellido_paterno.trim()} ${profesor.persona.apellido_materno || ''}`.trim()
   }
-  return `${profesor.nombre.trim()} ${profesor.apellido.trim()}`
+  return `${profesor.nombre.trim()} ${profesor.apellido_paterno.trim()} ${profesor.apellido_materno || ''}`.trim()
 }
 
 function parseTimeToMinutes(time: string) {
@@ -317,7 +317,7 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
     const fullName = getTeacherFullName(h.profesor)
     if (!profesoresMap.has(fullName)) {
       profesoresMap.set(fullName, {
-        id: h.profesor.id_profesor,
+        id: h.profesor.Persona_id_persona,
         nombre: fullName,
       })
     }
@@ -625,7 +625,7 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
                                       <div className="flex w-full flex-col gap-2">
                                         {slotClasses.map((h) => {
                                           const roomColors = getRoomColors(h.sala.nombre_sala)
-                                          const teacherAccent = getTeacherColor(h.profesor.id_profesor)
+                                          const teacherAccent = getTeacherColor(h.profesor.Persona_id_persona)
                                           const fullName = getTeacherFullName(h.profesor)
                                           const profesorNombre = fullName.split(' ')[0]
                                           const nivelBadge = getNivelBadge(h.nivel)
@@ -737,7 +737,7 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
                               .sort((a, b) => parseTimeToMinutes(a.hora_inicio) - parseTimeToMinutes(b.hora_inicio))
                               .map((h) => {
                                 const roomColors = getRoomColors(h.sala.nombre_sala)
-                                const teacherAccent = getTeacherColor(h.profesor.id_profesor)
+                                const teacherAccent = getTeacherColor(h.profesor.Persona_id_persona)
                                 const profesorNombre = getTeacherFullName(h.profesor)
                                 const nivelBadge = getNivelBadge(h.nivel)
                                 const cuposDisponibles = h.capacidad - (h.total_inscritos || 0)

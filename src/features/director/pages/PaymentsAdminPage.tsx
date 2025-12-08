@@ -105,7 +105,7 @@ export default function PaymentsAdminPage(): JSX.Element {
           return {
             id_inscripcion: insc.inscripcion.id_inscripcion,
             id_persona: insc.persona.id_persona,
-            alumno: `${insc.persona.nombre} ${insc.persona.apellido}`,
+            alumno: `${insc.persona.nombre} ${insc.persona.apellido_paterno} ${insc.persona.apellido_materno}`.trim(),
             nombre: `${insc.paquete.nombre} – ${insc.paquete.cantidad_clases} clases`,
             formaPago: pagos.length > 0 ? pagos[0].Metodo_pago_id_metodo_pago : 1,
             total: insc.inscripcion.precio_final,

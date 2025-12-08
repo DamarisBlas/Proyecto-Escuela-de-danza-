@@ -39,7 +39,7 @@ export const Detail = forwardRef<HTMLDivElement, DetailProps>(({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-50 p-3 rounded-lg">
             <div className="text-xs text-gray-500">Profesor</div>
-            <div className="font-medium">{selectedHorario.profesor.persona.nombre} {selectedHorario.profesor.persona.apellido}</div>
+            <div className="font-medium">{selectedHorario.profesor.persona.nombre} {selectedHorario.profesor.persona.apellido_paterno} {selectedHorario.profesor.persona.apellido_materno}</div>
           </div>
           <div className="bg-gray-50 p-3 rounded-lg">
             <div className="text-xs text-gray-500">Sala</div>
@@ -90,7 +90,7 @@ export const Detail = forwardRef<HTMLDivElement, DetailProps>(({
                 return (
                   <React.Fragment key={s.id}>
                     <tr>
-                      <td className="font-medium">{s.nombre} {s.apellido}</td>
+                      <td className="font-medium">{s.nombre} {s.apellido_paterno} {s.apellido_materno}</td>
                       <td className="text-sm">{s.email}</td>
                       <td className="text-sm">{s.celular}</td>
                       <td>
@@ -131,7 +131,7 @@ export const Detail = forwardRef<HTMLDivElement, DetailProps>(({
                     {expandedStudent === s.id && (
                       <tr>
                         <td colSpan={7} className="bg-gray-50 p-4">
-                          <div className="text-sm font-medium text-gray-700 mb-2">Todas las sesiones de {s.nombre} {s.apellido}:</div>
+                          <div className="text-sm font-medium text-gray-700 mb-2">Todas las sesiones de {s.nombre} {s.apellido_paterno} {s.apellido_materno}:</div>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                             {s.sesiones
                               .sort((a, b) => new Date(a.fecha + 'T12:00:00').getTime() - new Date(b.fecha + 'T12:00:00').getTime())

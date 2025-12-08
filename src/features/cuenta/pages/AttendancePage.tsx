@@ -73,20 +73,19 @@ interface SesionDetalle {
       estado: boolean
     }
     profesor: {
-      id_profesor: number
       Persona_id_persona: number
-      cuidad: string
+      pais_origen: string
       descripcion: string | null
       estado: boolean
-      estilos: any
-      experiencia: string | null
+      cuando_comenzo_danza: string | null
       frase: string | null
       musica: any
       redes_sociales: any
       signo: string | null
       persona: {
         nombre: string
-        apellido: string
+        apellido_paterno: string
+        apellido_materno: string
         email: string
         celular: string
       }

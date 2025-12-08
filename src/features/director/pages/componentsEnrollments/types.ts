@@ -28,7 +28,8 @@ export interface HorarioItem {
   profesor: {
     persona: {
       nombre: string;
-      apellido: string;
+      apellido_paterno: string;
+      apellido_materno: string;
     };
   };
   sala: {
@@ -42,7 +43,8 @@ export interface HorarioItem {
 export interface Student {
   id: number;
   nombre: string;
-  apellido: string;
+  apellido_paterno: string;
+  apellido_materno: string;
   email: string;
   celular: string;
   sesiones: {

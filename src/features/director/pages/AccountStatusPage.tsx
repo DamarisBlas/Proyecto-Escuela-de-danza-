@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
-
+import { env } from "@/config/env";
 
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ export default function AccountStatusPage() {
                 day: '2-digit',
                 month: '2-digit'
               }),
-              nombre: `${inscripcion.persona.nombre} ${inscripcion.persona.apellido}`,
+              nombre: `${inscripcion.persona.nombre} ${inscripcion.persona.apellido_paterno} ${inscripcion.persona.apellido_materno}`.trim(),
               programa: inscripcion.oferta.programa.nombre_programa,
               tipoCurso: inscripcion.oferta.subcategoria.nombre_subcategoria,
               detalle: `${inscripcion.paquete.nombre}-${inscripcion.paquete.cantidad_clases} clases`,

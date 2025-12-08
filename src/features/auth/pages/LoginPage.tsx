@@ -28,7 +28,8 @@ export default function LoginPage() {
 
   // Estado registro (demo)
   const [name, setName] = useState('')
-  const [apellido, setApellido] = useState('')
+  const [apellidoPaterno, setApellidoPaterno] = useState('')
+  const [apellidoMaterno, setApellidoMaterno] = useState('')
   const [regEmail, setRegEmail] = useState('')
   const [regPassword, setRegPassword] = useState('')
   const [phone, setPhone] = useState('')
@@ -112,7 +113,8 @@ export default function LoginPage() {
 
     const payload = {
       nombre: name.trim(),
-      apellido: apellido.trim() || undefined,
+      apellido_paterno: apellidoPaterno.trim() || undefined,
+      apellido_materno: apellidoMaterno.trim() || undefined,
       email: regEmail.trim(),
       celular: phone.trim() || undefined,
       password: regPassword,
@@ -132,7 +134,8 @@ export default function LoginPage() {
 
         // Clear registration inputs
         setName('')
-        setApellido('')
+        setApellidoPaterno('')
+        setApellidoMaterno('')
         setRegEmail('')
         setRegPassword('')
         setPhone('')
@@ -150,7 +153,8 @@ export default function LoginPage() {
       } catch (err) {
         // fallback local demo
         setName('')
-        setApellido('')
+        setApellidoPaterno('')
+        setApellidoMaterno('')
         setRegEmail('')
         setRegPassword('')
         setPhone('')
@@ -266,14 +270,26 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="apellido">Apellido</Label>
+                <Label htmlFor="apellido-paterno">Apellido Paterno</Label>
                 <Input
-                  id="apellido"
+                  id="apellido-paterno"
                   type="text"
                   autoComplete="family-name"
-                  placeholder="Ingresa tu apellido"
-                  value={apellido}
-                  onChange={(e) => setApellido(e.target.value)}
+                  placeholder="Ingresa tu apellido paterno"
+                  value={apellidoPaterno}
+                  onChange={(e) => setApellidoPaterno(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="apellido-materno">Apellido Materno</Label>
+                <Input
+                  id="apellido-materno"
+                  type="text"
+                  autoComplete="family-name"
+                  placeholder="Ingresa tu apellido materno"
+                  value={apellidoMaterno}
+                  onChange={(e) => setApellidoMaterno(e.target.value)}
                 />
               </div>
 

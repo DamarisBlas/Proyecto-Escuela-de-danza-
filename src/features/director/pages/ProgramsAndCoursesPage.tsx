@@ -531,8 +531,8 @@ export default function CrearCursoWizard() {
           cupos: h.capacidad,
           profesor: {
             id: h.profesor_id.toString(),
-            name: `${h.profesor.persona.nombre} ${h.profesor.persona.apellido}`,
-            nationality: h.profesor.cuidad || '',
+            name: `${h.profesor.persona.nombre} ${h.profesor.persona.apellido_paterno} ${h.profesor.persona.apellido_materno}`.trim(),
+            nationality: h.profesor.pais_origen || '',
             styles: [h.estilo.nombre_estilo],
             instagram: h.profesor.redes_sociales || ''
           }

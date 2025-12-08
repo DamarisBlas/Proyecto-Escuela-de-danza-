@@ -74,7 +74,7 @@ export default function CartPage() {
             const res = await api.get(`/sesiones/detalle/${id}`)
             // la respuesta contiene .horario y el profesor dentro de horario.profesor.persona
             const profesorPersona = res.data?.horario?.profesor?.persona
-            const nombreCompleto = profesorPersona ? `${profesorPersona.nombre} ${profesorPersona.apellido}`.trim() : res.data?.horario?.profesor?.nombre
+            const nombreCompleto = profesorPersona ? `${profesorPersona.nombre} ${profesorPersona.apellido_paterno} ${profesorPersona.apellido_materno}`.trim() : res.data?.horario?.profesor?.nombre
             fetched[id] = { profesorNombre: nombreCompleto }
           } catch (err) {
             console.error('Error al obtener detalle de sesión', id, err)

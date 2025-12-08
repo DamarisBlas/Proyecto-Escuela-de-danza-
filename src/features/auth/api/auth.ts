@@ -12,7 +12,7 @@ export async function login(payload: { email: string; password: string }): Promi
   const rawUser = data.user ?? data
 
   // Normalizamos el campo name si viene en español
-  const nameNormalized = rawUser.name ?? ((rawUser.nombre || rawUser.apellido) ? [rawUser.nombre, rawUser.apellido].filter(Boolean).join(' ') : undefined) ?? rawUser.email
+  const nameNormalized = rawUser.name ?? ((rawUser.nombre || rawUser.apellido_paterno) ? [rawUser.nombre, rawUser.apellido_paterno, rawUser.apellido_materno].filter(Boolean).join(' ') : undefined) ?? rawUser.email
 
   // Devolvemos el objeto original con name normalizado para que la UI pueda inspeccionar role_data
   const result: any = { ...rawUser, name: nameNormalized }
@@ -22,7 +22,8 @@ export async function login(payload: { email: string; password: string }): Promi
 // Register expects spanish fields from your backend
 export type RegisterPayload = {
   nombre: string
-  apellido?: string
+  apellido_paterno?: string
+  apellido_materno?: string
   email: string
   celular?: string
   password: string

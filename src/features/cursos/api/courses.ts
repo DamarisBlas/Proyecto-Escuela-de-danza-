@@ -85,15 +85,16 @@ interface BackendSesion {
     ilimitado: boolean
   }>
   profesor: {
-    id_profesor: number
+    Persona_id_persona: number
     nombre: string
-    apellido: string
+    apellido_paterno: string
+    apellido_materno: string
     frase: string | null
     descripcion: string | null
-    ciudad: string | null
+    pais_origen: string | null
     signo: string | null
-    musica_favorita: string | null
-    experiencia: string | null
+    musica: string | null
+    cuando_comenzo_danza: string | null
     instagram: string | null
   }
   sala: {
@@ -117,15 +118,15 @@ export async function listScheduleByDate(fecha: string): Promise<Session[]> {
   
   return data.sesiones.map((s) => {
     const instructor = {
-      id: String(s.profesor.id_profesor),
-      name: s.profesor.nombre + ' ' + s.profesor.apellido,
+      id: String(s.profesor.Persona_id_persona),
+      name: `${s.profesor.nombre} ${s.profesor.apellido_paterno} ${s.profesor.apellido_materno}`.trim(),
       instagram: s.profesor.instagram,
       frase: s.profesor.frase,
       descripcion: s.profesor.descripcion,
-      ciudad: s.profesor.ciudad,
+      pais_origen: s.profesor.pais_origen,
       signo: s.profesor.signo,
-      musica_favorita: s.profesor.musica_favorita,
-      experiencia: s.profesor.experiencia
+      musica: s.profesor.musica,
+      cuando_comenzo_danza: s.profesor.cuando_comenzo_danza
     }
     
     const sala = {
@@ -181,15 +182,15 @@ export async function listScheduleByCiclo(ciclo: string): Promise<Session[]> {
     
     return data.sesiones.map((s) => {
       const instructor = {
-        id: String(s.profesor.id_profesor),
-        name: s.profesor.nombre + ' ' + s.profesor.apellido,
+        id: String(s.profesor.Persona_id_persona),
+        name: `${s.profesor.nombre} ${s.profesor.apellido_paterno} ${s.profesor.apellido_materno}`.trim(),
         instagram: s.profesor.instagram,
         frase: s.profesor.frase,
         descripcion: s.profesor.descripcion,
-        ciudad: s.profesor.ciudad,
+        pais_origen: s.profesor.pais_origen,
         signo: s.profesor.signo,
-        musica_favorita: s.profesor.musica_favorita,
-        experiencia: s.profesor.experiencia
+        musica: s.profesor.musica,
+        cuando_comenzo_danza: s.profesor.cuando_comenzo_danza
       }
       
       const sala = {
