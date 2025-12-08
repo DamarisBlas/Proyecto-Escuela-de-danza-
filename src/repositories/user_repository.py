@@ -20,7 +20,8 @@ class UserRepository:
 
         nuevo_usuario = Persona(
             nombre=user_data.get('nombre'),
-            apellido=user_data.get('apellido'),
+            apellido_paterno=user_data.get('apellido_paterno'),
+            apellido_materno=user_data.get('apellido_materno'),
             email=user_data.get('email'),
             celular=user_data.get('celular'),
             password=user_data.get('password'),
