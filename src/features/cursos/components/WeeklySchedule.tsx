@@ -584,17 +584,17 @@ export default function WeeklySchedule({ onClose, isEmbedded = false }: WeeklySc
 
                       {/* Profesores */}
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold uppercase tracking-wide text-slate-600">Profesores ({profesores.length}):</span>
+                        <span className="text-xs font-bold uppercase tracking-wide text-slate-600">Profesores ({profesoresUnicos.length}):</span>
                         <div className="flex flex-wrap gap-2">
-                          {profesores.map((profesor) => {
-                            const teacherAccent = TEACHER_COLOR_PALETTE[profesores.indexOf(profesor) % TEACHER_COLOR_PALETTE.length]
+                          {profesoresUnicos.map((profesor) => {
+                            const teacherAccent = getTeacherColor(profesor.id)
                             return (
-                              <div key={profesor} className="flex items-center gap-1.5">
+                              <div key={profesor.id} className="flex items-center gap-1.5">
                                 <div
                                   className="h-2.5 w-2.5 rounded-full border border-slate-300"
                                   style={{ background: teacherAccent }}
                                 />
-                                <span className="text-xs font-medium text-slate-700">{profesor}</span>
+                                <span className="text-xs font-medium text-slate-700">{profesor.nombre}</span>
                               </div>
                             )
                           })}
