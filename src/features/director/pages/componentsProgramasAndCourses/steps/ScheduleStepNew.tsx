@@ -22,6 +22,7 @@ interface Teacher {
 
 interface NewTeacherData {
   nombre?: string
+  apellido_paterno?: string
   nationality?: string
   instagram?: string
 }
@@ -155,12 +156,13 @@ export function ScheduleStepNew({
     const horarioId = horarios[horarioIndex].id
     const data = newProfesorData[horarioId]
     
-    if (data?.nombre && data?.nationality) {
+    if (data?.nombre && data?.apellido_paterno && data?.nationality) {
       try {
         // Crear profesor temporal en el backend
         const newProfesor = await createProfesorTemporal({
           nombre: data.nombre,
-          cuidad: data.nationality,
+          apellido_paterno: data.apellido_paterno,
+          pais_origen: data.nationality,
           redes_sociales: data.instagram || ''
         })
         
@@ -397,7 +399,19 @@ export function ScheduleStepNew({
                           ...newProfesorData,
                           [horarioId]: { ...newProfesorData[horarioId], nombre: e.target.value }
                         })}
-                        placeholder="Ej: Juan Pérez"
+                        placeholder="Ej: Juan"
+                      />
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label className="text-sm">Apellido Paterno *</Label>
+                      <Input 
+                        value={newProfesorData[horarioId]?.apellido_paterno || ''}
+                        onChange={(e) => setNewProfesorData({
+                          ...newProfesorData,
+                          [horarioId]: { ...newProfesorData[horarioId], apellido_paterno: e.target.value }
+                        })}
+                        placeholder="Ej: Pérez"
                       />
                     </div>
                     
@@ -428,7 +442,7 @@ export function ScheduleStepNew({
                     <Button 
                       size="sm" 
                       onClick={() => saveNewProfesor(index)}
-                      disabled={!newProfesorData[horarioId]?.nombre || !newProfesorData[horarioId]?.nationality}
+                      disabled={!newProfesorData[horarioId]?.nombre || !newProfesorData[horarioId]?.apellido_paterno || !newProfesorData[horarioId]?.nationality}
                       className="w-full"
                     >
                       Guardar profesor

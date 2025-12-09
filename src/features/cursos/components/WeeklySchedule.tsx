@@ -82,9 +82,20 @@ function getTeacherColor(idProfesor: number) {
 function getTeacherFullName(profesor: any) {
   // Soportar ambas estructuras: profesor.persona.nombre o profesor.nombre directamente
   if (profesor.persona) {
-    return `${profesor.persona.nombre.trim()} ${profesor.persona.apellido_paterno.trim()} ${profesor.persona.apellido_materno || ''}`.trim()
+    const nombre = (profesor.persona.nombre || '').trim()
+    const apPat = (profesor.persona.apellido_paterno || '').trim()
+    const apMat = (profesor.persona.apellido_materno || '').trim()
+    return `${nombre} ${apPat} ${apMat}`.trim()
   }
-  return `${profesor.nombre.trim()} ${profesor.apellido_paterno.trim()} ${profesor.apellido_materno || ''}`.trim()
+  const nombre = (profesor.nombre || '').trim()
+  const apPat = (profesor.apellido_paterno || '').trim()
+  const apMat = (profesor.apellido_materno || '').trim()
+  return `${nombre} ${apPat} ${apMat}`.trim()
+}
+
+// Extrae un id estable del profesor (persona_id, Persona_id_persona, id_profesor o persona.id_persona)
+function getProfessorId(profesor: any) {
+  return profesor.persona_id ?? profesor.Persona_id_persona ?? profesor.id_profesor ?? profesor.persona?.id_persona ?? 0
 }
 
 function parseTimeToMinutes(time: string) {
@@ -94,9 +105,10 @@ function parseTimeToMinutes(time: string) {
 
 interface WeeklyScheduleProps {
   onClose: () => void
+  isEmbedded?: boolean // Nueva prop para modo integrado (sin modal flotante)
 }
 
-export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
+export default function WeeklySchedule({ onClose, isEmbedded = false }: WeeklyScheduleProps) {
   const { user } = useAuthStore()
   const [salaFilter, setSalaFilter] = useState('all')
   const [profesorFilter, setProfesorFilter] = useState('all')
@@ -262,6 +274,13 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
   }
 
   if (isLoading) {
+    if (isEmbedded) {
+      return (
+        <div className="py-12 flex items-center justify-center">
+          <Spinner />
+        </div>
+      )
+    }
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="relative mx-4 w-full max-w-7xl rounded-3xl bg-white p-8 shadow-2xl">
@@ -272,6 +291,23 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
   }
 
   if (error || !data) {
+    if (isEmbedded) {
+      return (
+        <div className="rounded-3xl bg-white p-8 shadow-lg">
+          <div className="flex flex-col items-center gap-4 py-8">
+            <div className="rounded-full bg-red-50 p-4">
+              <X className="h-8 w-8 text-red-500" />
+            </div>
+            <p className="text-center text-lg font-semibold text-red-600">
+              Error al cargar los horarios
+            </p>
+            <p className="text-center text-sm text-slate-600">
+              Por favor, intenta nuevamente más tarde
+            </p>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="relative mx-4 w-full max-w-7xl rounded-3xl bg-white p-8 shadow-2xl">
@@ -317,7 +353,7 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
     const fullName = getTeacherFullName(h.profesor)
     if (!profesoresMap.has(fullName)) {
       profesoresMap.set(fullName, {
-        id: h.profesor.Persona_id_persona,
+        id: getProfessorId(h.profesor),
         nombre: fullName,
       })
     }
@@ -378,24 +414,26 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="h-full overflow-y-auto">
-        <div className="min-h-full p-4 md:p-6 lg:p-8">
-          <div className="relative mx-auto max-w-7xl rounded-3xl bg-gradient-to-br from-white via-slate-50 to-white shadow-2xl">
+    <div className={isEmbedded ? '' : 'fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-sm animate-in fade-in duration-200'}>
+      <div className={isEmbedded ? '' : 'h-full overflow-y-auto'}>
+        <div className={isEmbedded ? '' : 'min-h-full p-4 md:p-6 lg:p-8'}>
+          <div className={`relative ${isEmbedded ? '' : 'mx-auto max-w-7xl'} rounded-3xl bg-gradient-to-br from-white via-slate-50 to-white shadow-2xl`}>
             {/* Header con gradiente */}
             <div className="relative overflow-hidden rounded-t-3xl bg-gradient-to-r from-femme-magenta via-femme-rose to-femme-coral px-6 py-8 md:px-8 md:py-10">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20"></div>
               
               <div className="relative">
-                <button
-                  onClick={onClose}
-                  className="absolute -right-2 -top-2 rounded-full bg-white/20 p-2.5 text-white backdrop-blur-sm transition-all hover:bg-white/30 hover:scale-110 active:scale-95 md:right-0 md:top-0"
-                  aria-label="Cerrar"
-                >
-                  <X size={24} />
-                </button>
+                {!isEmbedded && (
+                  <button
+                    onClick={onClose}
+                    className="absolute -right-2 -top-2 rounded-full bg-white/20 p-2.5 text-white backdrop-blur-sm transition-all hover:bg-white/30 hover:scale-110 active:scale-95 md:right-0 md:top-0"
+                    aria-label="Cerrar"
+                  >
+                    <X size={24} />
+                  </button>
+                )}
 
-                <div className="pr-12">
+                <div className={isEmbedded ? '' : 'pr-12'}>
                   <h2 className="mb-2 text-2xl font-bold text-white md:text-3xl lg:text-4xl">
                      Horario Semanal
                   </h2>
@@ -573,13 +611,13 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
                     </p>
                   </div>
 
-                  {/* Grid de horarios - Vista Desktop */}
-                  <div className="hidden overflow-x-auto rounded-2xl border-2 border-slate-200/80 bg-white shadow-xl md:block">
-                    <div className="min-w-[900px]">
+                  {/* Grid de horarios - Mismo diseño para móvil y desktop (solo cambia el tamaño) */}
+                  <div className="overflow-x-auto rounded-2xl border-2 border-slate-200/80 bg-white shadow-xl">
+                    <div className="min-w-[750px] md:min-w-[900px]">
                       <div
                         className="grid gap-0.5 bg-slate-100 p-0.5"
                         style={{
-                          gridTemplateColumns: `minmax(100px, 120px) repeat(7, minmax(140px, 1fr))`,
+                          gridTemplateColumns: `minmax(70px, 80px) repeat(7, minmax(90px, 1fr))`,
                         }}
                       >
                         {/* Cabecera vacía para la columna de horas */}
@@ -589,12 +627,12 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
                         {DAYS.map((day, idx) => (
                           <div
                             key={day}
-                            className="bg-gradient-to-br from-femme-magenta/5 to-femme-rose/5 py-4 text-center"
+                            className="bg-gradient-to-br from-femme-magenta/5 to-femme-rose/5 py-2 md:py-4 text-center"
                           >
-                            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                            <div className="text-[9px] md:text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                               {DAYS_SHORT[idx]}
                             </div>
-                            <div className="mt-0.5 text-sm font-bold text-slate-700">{day}</div>
+                            <div className="mt-0.5 text-xs md:text-sm font-bold text-slate-700">{day}</div>
                           </div>
                         ))}
 
@@ -604,11 +642,11 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
 
                           return (
                             <React.Fragment key={slot}>
-                              <div className="bg-gradient-to-r from-slate-50 to-white flex items-center justify-center px-3 py-4">
+                              <div className="bg-gradient-to-r from-slate-50 to-white flex items-center justify-center px-2 md:px-3 py-3 md:py-4">
                                 <div className="text-center">
-                                  <div className="text-xs font-bold text-slate-700">{start}</div>
-                                  <div className="text-[10px] text-slate-400">a</div>
-                                  <div className="text-xs font-bold text-slate-700">{end}</div>
+                                  <div className="text-[10px] md:text-xs font-bold text-slate-700">{start}</div>
+                                  <div className="text-[8px] md:text-[10px] text-slate-400">a</div>
+                                  <div className="text-[10px] md:text-xs font-bold text-slate-700">{end}</div>
                                 </div>
                               </div>
                               {DAYS.map((day) => {
@@ -619,13 +657,13 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
                                 return (
                                   <div
                                     key={day}
-                                    className="bg-white flex min-h-[100px] items-center justify-center p-2"
+                                    className="bg-white flex min-h-[80px] md:min-h-[100px] items-center justify-center p-1.5 md:p-2"
                                   >
                                     {slotClasses.length > 0 ? (
-                                      <div className="flex w-full flex-col gap-2">
+                                      <div className="flex w-full flex-col gap-1.5 md:gap-2">
                                         {slotClasses.map((h) => {
                                           const roomColors = getRoomColors(h.sala.nombre_sala)
-                                          const teacherAccent = getTeacherColor(h.profesor.Persona_id_persona)
+                                          const teacherAccent = getTeacherColor(getProfessorId(h.profesor))
                                           const fullName = getTeacherFullName(h.profesor)
                                           const profesorNombre = fullName.split(' ')[0]
                                           const nivelBadge = getNivelBadge(h.nivel)
@@ -636,53 +674,53 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
                                             <div
                                               key={h.id_horario}
                                               onClick={() => handleToggleHorario(h.id_horario)}
-                                              className={`group relative w-full cursor-pointer overflow-hidden rounded-xl border-2 shadow-md transition-all hover:scale-105 hover:shadow-xl ${
-                                                isSelected ? 'ring-4 ring-green-400 ring-offset-2' : ''
+                                              className={`group relative w-full cursor-pointer overflow-hidden rounded-lg md:rounded-xl border-2 shadow-md transition-all hover:scale-105 hover:shadow-xl ${
+                                                isSelected ? 'ring-2 md:ring-4 ring-green-400 ring-offset-1 md:ring-offset-2' : ''
                                               }`}
                                               style={{
                                                 background: roomColors.bg,
                                                 borderColor: isSelected ? '#10b981' : roomColors.border,
                                               }}
                                             >
-                                              <div className="relative p-3">
+                                              <div className="relative p-2 md:p-3">
                                                 {/* Selection indicator */}
                                                 {isSelected && (
-                                                  <div className="absolute left-2 top-2 rounded-full bg-femme-magenta p-1">
-                                                    <CheckCircle2 className="h-3 w-3 text-white" />
+                                                  <div className="absolute left-1.5 md:left-2 top-1.5 md:top-2 rounded-full bg-femme-magenta p-0.5 md:p-1">
+                                                    <CheckCircle2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-white" />
                                                   </div>
                                                 )}
                                                 
                                                 {/* Nivel badge - esquina superior */}
-                                                <div className="absolute right-2 top-2">
-                                                  <span className={`rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${nivelBadge.color}`}>
+                                                <div className="absolute right-1.5 md:right-2 top-1.5 md:top-2">
+                                                  <span className={`rounded-md border px-1 md:px-1.5 py-0.5 text-[8px] md:text-[9px] font-bold uppercase tracking-wider ${nivelBadge.color}`}>
                                                     {nivelBadge.label}
                                                   </span>
                                                 </div>
 
                                                 {/* Nombre del estilo */}
-                                                <h4 className="mb-2 pr-12 text-sm font-black uppercase leading-tight tracking-wide text-white">
+                                                <h4 className="mb-1.5 md:mb-2 pr-10 md:pr-12 text-[10px] md:text-sm font-black uppercase leading-tight tracking-wide text-white">
                                                   {h.estilo.nombre_estilo}
                                                 </h4>
 
                                                 {/* Info del profesor */}
-                                                <div className="mb-1.5 flex items-center gap-1.5">
+                                                <div className="mb-1 md:mb-1.5 flex items-center gap-1 md:gap-1.5">
                                                   <span
-                                                    className="h-2 w-2 flex-shrink-0 rounded-full border border-white/50"
+                                                    className="h-1.5 w-1.5 md:h-2 md:w-2 flex-shrink-0 rounded-full border border-white/50"
                                                     style={{ background: teacherAccent }}
                                                   />
-                                                  <span className="text-xs font-semibold text-white/95">
+                                                  <span className="text-[9px] md:text-xs font-semibold text-white/95 truncate">
                                                     {profesorNombre}
                                                   </span>
                                                 </div>
 
                                                 {/* Sala y cupos */}
-                                                <div className="flex items-center justify-between text-[10px] text-white/80">
-                                                  <span className="flex items-center gap-1">
-                                                    <MapPin className="h-3 w-3" />
-                                                    {h.sala.zona}
+                                                <div className="flex items-center justify-between text-[8px] md:text-[10px] text-white/80">
+                                                  <span className="flex items-center gap-0.5 md:gap-1 truncate">
+                                                    <MapPin className="h-2.5 w-2.5 md:h-3 md:w-3 flex-shrink-0" />
+                                                    <span className="truncate">{h.sala.zona}</span>
                                                   </span>
-                                                  <span className="flex items-center gap-1 font-semibold">
-                                                    <Users className="h-3 w-3" />
+                                                  <span className="flex items-center gap-0.5 md:gap-1 font-semibold flex-shrink-0">
+                                                    <Users className="h-2.5 w-2.5 md:h-3 md:w-3" />
                                                     {cuposDisponibles}/{h.capacidad}
                                                   </span>
                                                 </div>
@@ -702,116 +740,6 @@ export default function WeeklySchedule({ onClose }: WeeklyScheduleProps) {
                         })}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Vista Mobile - Lista por día */}
-                  <div className="space-y-4 md:hidden">
-                    {DAYS.map((day, dayIdx) => {
-                      const dayClasses = filteredHorarios.filter((h) => h.dias === day)
-                      
-                      if (dayClasses.length === 0) return null
-
-                      return (
-                        <div key={day} className="overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-lg">
-                          {/* Header del día */}
-                          <div className="bg-gradient-to-r from-femme-magenta to-femme-rose px-4 py-3">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="text-xs font-semibold uppercase tracking-wider text-white/80">
-                                  {DAYS_SHORT[dayIdx]}
-                                </div>
-                                <div className="text-lg font-bold text-white">{day}</div>
-                              </div>
-                              <div className="rounded-lg bg-white/20 px-3 py-1 backdrop-blur-sm">
-                                <span className="text-sm font-bold text-white">{dayClasses.length}</span>
-                                <span className="ml-1 text-xs text-white/80">
-                                  {dayClasses.length === 1 ? 'clase' : 'clases'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Clases del día */}
-                          <div className="divide-y divide-slate-100">
-                            {dayClasses
-                              .sort((a, b) => parseTimeToMinutes(a.hora_inicio) - parseTimeToMinutes(b.hora_inicio))
-                              .map((h) => {
-                                const roomColors = getRoomColors(h.sala.nombre_sala)
-                                const teacherAccent = getTeacherColor(h.profesor.Persona_id_persona)
-                                const profesorNombre = getTeacherFullName(h.profesor)
-                                const nivelBadge = getNivelBadge(h.nivel)
-                                const cuposDisponibles = h.capacidad - (h.total_inscritos || 0)
-                                const isSelected = selectedHorarios.includes(h.id_horario)
-
-                                return (
-                                  <div 
-                                    key={h.id_horario} 
-                                    onClick={() => handleToggleHorario(h.id_horario)}
-                                    className={`p-4 cursor-pointer transition-all ${
-                                      isSelected ? 'bg-femme-softpink border-l-4 border-femme-magenta' : ''
-                                    }`}
-                                  >
-                                    <div className="flex gap-3">
-                                      {/* Hora */}
-                                      <div className="flex flex-col items-center justify-center rounded-xl bg-slate-50 px-3 py-2">
-                                        <div className="text-xs font-bold text-slate-700">{h.hora_inicio}</div>
-                                        <div className="text-[10px] text-slate-400">a</div>
-                                        <div className="text-xs font-bold text-slate-700">{h.hora_fin}</div>
-                                      </div>
-
-                                      {/* Contenido */}
-                                      <div className="flex-1">
-                                        <div
-                                          className="overflow-hidden rounded-xl border-2 shadow-md"
-                                          style={{
-                                            background: roomColors.bg,
-                                            borderColor: roomColors.border,
-                                          }}
-                                        >
-                                          <div className="p-3">
-                                            {/* Título y nivel */}
-                                            <div className="mb-2 flex items-start justify-between gap-2">
-                                              <h4 className="flex-1 text-sm font-black uppercase leading-tight tracking-wide text-white">
-                                                {h.estilo.nombre_estilo}
-                                              </h4>
-                                              <span className={`rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${nivelBadge.color}`}>
-                                                {nivelBadge.label}
-                                              </span>
-                                            </div>
-
-                                            {/* Profesor */}
-                                            <div className="mb-2 flex items-center gap-1.5">
-                                              <span
-                                                className="h-2.5 w-2.5 flex-shrink-0 rounded-full border border-white/50"
-                                                style={{ background: teacherAccent }}
-                                              />
-                                              <span className="text-xs font-semibold text-white/95">
-                                                {profesorNombre}
-                                              </span>
-                                            </div>
-
-                                            {/* Sala y cupos */}
-                                            <div className="flex items-center justify-between text-xs text-white/80">
-                                              <span className="flex items-center gap-1">
-                                                <MapPin className="h-3 w-3" />
-                                                {h.sala.nombre_sala} - {h.sala.zona}
-                                              </span>
-                                              <span className="flex items-center gap-1 rounded-md bg-white/20 px-2 py-0.5 font-semibold backdrop-blur-sm">
-                                                <Users className="h-3 w-3" />
-                                                {cuposDisponibles}/{h.capacidad}
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                          </div>
-                        </div>
-                      )
-                    })}
                   </div>
 
                   {/* Selected Schedules Section */}

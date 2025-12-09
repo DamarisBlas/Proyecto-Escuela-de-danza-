@@ -85,7 +85,10 @@ interface BackendSesion {
     ilimitado: boolean
   }>
   profesor: {
-    Persona_id_persona: number
+    persona_id?: number
+    Persona_id_persona?: number
+    id_profesor?: number
+    persona?: BackendPersona
     nombre: string
     apellido_paterno: string
     apellido_materno: string
@@ -117,9 +120,10 @@ export async function listScheduleByDate(fecha: string): Promise<Session[]> {
   const { data } = await api.get<BackendResponse>(url)
   
   return data.sesiones.map((s) => {
+    const profId = s.profesor.persona_id ?? s.profesor.Persona_id_persona ?? s.profesor.id_profesor ?? s.profesor.persona?.id_persona
     const instructor = {
-      id: String(s.profesor.Persona_id_persona),
-      name: `${s.profesor.nombre} ${s.profesor.apellido_paterno} ${s.profesor.apellido_materno}`.trim(),
+      id: String(profId),
+       name: `${s.profesor.nombre ?? s.profesor.persona?.nombre} ${s.profesor.apellido_paterno || s.profesor.persona?.apellido_paterno || ''} ${s.profesor.apellido_materno || s.profesor.persona?.apellido_materno || ''}`.trim(),
       instagram: s.profesor.instagram,
       frase: s.profesor.frase,
       descripcion: s.profesor.descripcion,
@@ -181,9 +185,10 @@ export async function listScheduleByCiclo(ciclo: string): Promise<Session[]> {
     const { data } = await api.get<BackendResponse>('/sesiones/ciclo/' + encodeURIComponent(ciclo))
     
     return data.sesiones.map((s) => {
+      const profId = s.profesor.persona_id ?? s.profesor.Persona_id_persona ?? s.profesor.id_profesor ?? s.profesor.persona?.id_persona
       const instructor = {
-        id: String(s.profesor.Persona_id_persona),
-        name: `${s.profesor.nombre} ${s.profesor.apellido_paterno} ${s.profesor.apellido_materno}`.trim(),
+        id: String(profId),
+         name: `${s.profesor.nombre ?? s.profesor.persona?.nombre} ${s.profesor.apellido_paterno || s.profesor.persona?.apellido_paterno || ''} ${s.profesor.apellido_materno || s.profesor.persona?.apellido_materno || ''}`.trim(),
         instagram: s.profesor.instagram,
         frase: s.profesor.frase,
         descripcion: s.profesor.descripcion,
@@ -248,20 +253,25 @@ export async function listScheduleByCiclo(ciclo: string): Promise<Session[]> {
 interface BackendPersona {
   id_persona: number
   nombre: string
-  apellido: string
+  apellido_paterno: string 
+  apellido_materno: string | null
   celular: string | null
   email: string | null
   estado: boolean
 }
 
 interface BackendProfesor {
-  id_profesor: number
+  id_profesor?: number
+  persona_id?: number
+  Persona_id_persona?: number
   estado?: boolean
   // Estructura antigua (con persona anidada)
   persona?: BackendPersona
   // Estructura nueva (directa)
   nombre?: string
-  apellido?: string
+  apellido_paterno?: string
+  apellido_materno?: string | null
+  redes_sociales?: any | null
 }
 
 interface BackendEstilo {

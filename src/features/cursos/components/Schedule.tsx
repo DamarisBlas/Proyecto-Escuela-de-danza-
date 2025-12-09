@@ -16,7 +16,6 @@ import DateRangeErrorModal from './DateRangeErrorModal'
 import ClassLimitModal from './ClassLimitModal'
 import SelectionRequiredModal from './SelectionRequiredModal'
 import WeeklySchedule from './WeeklySchedule'
-import CycleSchedule from './CycleSchedule'
 
 // ---------- helpers de fechas ----------
 const fmtDayShortLower = (d: Date) => {
@@ -329,9 +328,8 @@ export default function Schedule() {
   const { addItem } = useCart()
   const { user } = useAuth()
   
-  // Estado para abrir/cerrar las vistas especiales
-  const [showWeeklySchedule, setShowWeeklySchedule] = useState(false)
-  const [showCycleSchedule, setShowCycleSchedule] = useState(false)
+  // Estado para toggle de vista: 'day' o 'week'
+  const [viewMode, setViewMode] = useState<'day' | 'week'>('day')
 
   // Estado de promoción activa
   const [activePromotion, setActivePromotion] = useState<{
@@ -1009,127 +1007,155 @@ export default function Schedule() {
         </div>
       )}
       
-      {/* Barra de días sticky */}
-      <div className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70">
-        <div className="mx-auto max-w-6xl px-2 py-2 sm:px-4 sm:py-3 md:px-6">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => {
-                setWeekStart(addDays(weekStart, -7))
-                setActiveIndex(0)
-              }}
-              className="inline-flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-femme-magenta"
-              aria-label="Semana anterior"
-            >
-              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-            </button>
-
-            <div
-              role="tablist"
-              aria-label="Seleccionar día de la semana"
-              onKeyDown={onTabsKeyDown}
-              className="flex flex-1 items-stretch gap-1.5 sm:gap-2 md:gap-3 overflow-x-auto scroll-smooth pt-4 pb-1 -mb-1"
-            >
-              {days.map((d, i) => {
-                const isActive = i === activeIndex
-                const isToday = sameDay(d, today)
-                return (
-                  <button
-                    role="tab"
-                    aria-selected={isActive}
-                    key={i}
-                    onClick={() => setActiveIndex(i)}
-                    className={
-                      'relative flex min-w-[70px] sm:min-w-[90px] md:min-w-[110px] flex-col items-center justify-center rounded-xl sm:rounded-2xl border px-2 py-2.5 sm:px-4 sm:py-3 md:px-5 md:py-4 text-slate-800 shadow-sm transition ' +
-                      (isActive
-                        ? 'border-femme-magenta/30 bg-white ring-1 ring-femme-magenta/20'
-                        : 'border-slate-200 bg-white hover:bg-slate-50')
-                    }
-                  >
-                    <span className="text-[9px] sm:text-[10px] md:text-[11px] text-slate-500">{fmtDayShortLower(d)}</span>
-                    <span className="mt-0.5 text-sm sm:text-base md:text-lg font-extrabold tracking-wide">{DAYS_LABEL[i]}</span>
-                    {/* Indicador inferior */}
-                    <span
-                      className={
-                        'absolute inset-x-2 sm:inset-x-3 md:inset-x-4 bottom-0.5 sm:bottom-1 h-[2px] sm:h-[3px] rounded-full transition-all ' +
-                        (isActive ? 'bg-femme-magenta' : 'bg-transparent')
-                      }
-                    ></span>
-                    {isToday && (
-                      <span className="absolute -top-2.5 sm:-top-3 rounded-full bg-femme-magenta px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold text-white shadow whitespace-nowrap">
-                        Hoy
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
-            <button
-              onClick={() => {
-                setWeekStart(addDays(weekStart, 7))
-                setActiveIndex(0)
-              }}
-              className="inline-flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-femme-magenta"
-              aria-label="Próxima semana"
-            >
-              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-            </button>
-
-            <button
-              onClick={() => {
-                const newWeekStart = startOfWeekMonday(new Date())
-                const newDays = Array.from({ length: 7 }, (_, i) => addDays(newWeekStart, i))
-                const i = newDays.findIndex((d) => sameDay(d, new Date()))
-                setWeekStart(newWeekStart)
-                setActiveIndex(i === -1 ? 0 : i)
-              }}
-              className="ml-1 sm:ml-2 inline-flex items-center gap-1 sm:gap-2 rounded-xl bg-femme-magenta px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-sm transition hover:bg-femme-rose focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-femme-magenta flex-shrink-0"
-            >
-              <Calendar className="h-3 w-3 sm:h-4 sm:w-4" /> Hoy
-            </button>
-            
-           
-          </div>
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-6xl px-2 sm:px-4 pb-8 pt-4 md:px-6">
-        {/* Panel de filtros - Ocultar en modo selección */}
-        {!selectionMode && (
-          <>
-            <div className="flex flex-col gap-4 mb-4">
-              <Filters
-                branch={branch}
-                type={type}
-                teachers={teachers}
-                branchOptions={branchOptions}
-                teacherOptions={teacherOptions}
-                onBranchChange={setBranch}
-                onTypeChange={setType}
-                onTeachersChange={setTeachers}
-              />
-              
-              {/* Botones de vistas especiales */}
-              <div className="flex flex-col sm:flex-row gap-3">
+      {/* Toggle: Agenda diaria / Agenda semanal - ENCIMA de barra de días */}
+      {!selectionMode && (
+        <div className="bg-white border-b border-slate-200/80">
+          <div className="mx-auto max-w-6xl px-2 sm:px-4 py-3 md:px-6">
+            <div className="flex justify-center">
+              <div 
+                className="inline-flex items-center w-full max-w-md p-1 rounded-full bg-white border border-femme-magenta/20 shadow-lg gap-0.5"
+                role="group"
+                aria-label="Cambiar vista de agenda"
+              >
                 <button
-                  onClick={() => setShowWeeklySchedule(true)}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-femme-magenta to-femme-rose px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-femme-magenta"
+                  onClick={() => setViewMode('day')}
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold transition-all duration-200 ${
+                    viewMode === 'day'
+                      ? 'bg-femme-magenta text-white shadow-md'
+                      : 'bg-transparent text-slate-600 hover:text-femme-magenta'
+                  }`}
                 >
-                  <CalendarDays className="h-4 w-4" />
-                  Ver Horario Semanal
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                    <rect x="4" y="5" width="16" height="3" rx="1" />
+                    <rect x="4" y="10.5" width="10" height="3" rx="1" />
+                    <rect x="4" y="16" width="13" height="3" rx="1" />
+                  </svg>
+                  Agenda diaria
                 </button>
-                {/**
                 <button
-                  onClick={() => setShowCycleSchedule(true)}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-yellow-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                  onClick={() => setViewMode('week')}
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold transition-all duration-200 ${
+                    viewMode === 'week'
+                      ? 'bg-femme-magenta text-white shadow-md'
+                      : 'bg-transparent text-slate-600 hover:text-femme-magenta'
+                  }`}
                 >
-                  <FileText className="h-4 w-4" />
-                  Cronograma por Ciclo
-                </button>*/}
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                    <rect x="4" y="5" width="5" height="5" rx="1" />
+                    <rect x="10" y="5" width="5" height="5" rx="1" />
+                    <rect x="16" y="5" width="4" height="5" rx="1" />
+                    <rect x="4" y="13" width="5" height="5" rx="1" />
+                    <rect x="10" y="13" width="5" height="5" rx="1" />
+                    <rect x="16" y="13" width="4" height="5" rx="1" />
+                  </svg>
+                  Agenda semanal
+                </button>
               </div>
             </div>
-          </>
+          </div>
+        </div>
+      )}
+      
+      {/* Barra de días sticky - Solo en vista diaria */}
+      {viewMode === 'day' && (
+        <div className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70">
+          <div className="mx-auto max-w-6xl px-2 py-2 sm:px-4 sm:py-3 md:px-6">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={() => {
+                  setWeekStart(addDays(weekStart, -7))
+                  setActiveIndex(0)
+                }}
+                className="inline-flex h-7 w-7 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-femme-magenta"
+                aria-label="Semana anterior"
+              >
+                <ChevronLeft className="h-3 w-3 sm:h-5 sm:w-5" />
+              </button>
+
+              <div
+                role="tablist"
+                aria-label="Seleccionar día de la semana"
+                onKeyDown={onTabsKeyDown}
+                className="flex flex-1 items-stretch gap-1 sm:gap-2 md:gap-3 overflow-visible pt-3 pb-1 -mb-1"
+              >
+                {days.map((d, i) => {
+                  const isActive = i === activeIndex
+                  const isToday = sameDay(d, today)
+                  return (
+                    <button
+                      role="tab"
+                      aria-selected={isActive}
+                      key={i}
+                      onClick={() => setActiveIndex(i)}
+                      className={
+                        'relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-lg sm:rounded-xl border px-1 py-1.5 sm:px-4 sm:py-3 md:px-5 md:py-4 text-slate-800 shadow-sm transition ' +
+                        (isActive
+                          ? 'border-femme-magenta/30 bg-white ring-1 ring-femme-magenta/20'
+                          : 'border-slate-200 bg-white hover:bg-slate-50')
+                      }
+                    >
+                      <span className="text-[8px] sm:text-[10px] md:text-[11px] text-slate-500 truncate">{fmtDayShortLower(d)}</span>
+                      <span className="mt-0.5 text-[10px] sm:text-base md:text-lg font-extrabold tracking-wide">{DAYS_LABEL[i]}</span>
+                      {/* Indicador inferior */}
+                      <span
+                        className={
+                          'absolute inset-x-1 sm:inset-x-3 md:inset-x-4 bottom-0.5 sm:bottom-1 h-[2px] sm:h-[3px] rounded-full transition-all ' +
+                          (isActive ? 'bg-femme-magenta' : 'bg-transparent')
+                        }
+                      ></span>
+                      {isToday && (
+                        <span className="absolute -top-2 sm:-top-3 rounded-full bg-femme-magenta px-1 sm:px-2 py-0.5 text-[8px] sm:text-[10px] font-semibold text-white shadow whitespace-nowrap">
+                          Hoy
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <button
+                onClick={() => {
+                  setWeekStart(addDays(weekStart, 7))
+                  setActiveIndex(0)
+                }}
+                className="inline-flex h-7 w-7 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg sm:rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-femme-magenta"
+                aria-label="Próxima semana"
+              >
+                <ChevronRight className="h-3 w-3 sm:h-5 sm:w-5" />
+              </button>
+
+              <button
+                onClick={() => {
+                  const newWeekStart = startOfWeekMonday(new Date())
+                  const newDays = Array.from({ length: 7 }, (_, i) => addDays(newWeekStart, i))
+                  const i = newDays.findIndex((d) => sameDay(d, new Date()))
+                  setWeekStart(newWeekStart)
+                  setActiveIndex(i === -1 ? 0 : i)
+                }}
+                className="ml-0.5 sm:ml-2 inline-flex items-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl bg-femme-magenta px-2 sm:px-3 py-1 sm:py-2 text-[10px] sm:text-sm font-semibold text-white shadow-sm transition hover:bg-femme-rose focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-femme-magenta flex-shrink-0"
+              >
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Hoy</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="mx-auto max-w-6xl px-2 sm:px-4 pb-8 pt-4 md:px-6">
+        {/* Panel de filtros - Solo mostrar en vista diaria */}
+        {!selectionMode && viewMode === 'day' && (
+          <div className="mb-4">
+            <Filters
+              branch={branch}
+              type={type}
+              teachers={teachers}
+              branchOptions={branchOptions}
+              teacherOptions={teacherOptions}
+              onBranchChange={setBranch}
+              onTypeChange={setType}
+              onTeachersChange={setTeachers}
+            />
+          </div>
         )}
 
         {/* Banner de selección de clases */}
@@ -1199,101 +1225,109 @@ export default function Schedule() {
           </div>
         )}
 
-        {/* Encabezado de lista */}
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="text-sm sm:text-base font-semibold text-slate-800 capitalize truncate">
-            {fmtHeader.format(days[activeIndex] || weekStart)}
-          </h2>
-          <span
-            aria-live="polite"
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 shadow-sm whitespace-nowrap"
-          >
-            {count} {count === 1 ? 'clase' : 'clases'}
-          </span>
-        </div>
-
-        {/* Contenido */}
-        {isLoading ? (
-          <div className="py-12 grid place-items-center">
-            <Spinner label="Cargando horarios..." />
+        {/* Encabezado de lista - Solo mostrar en vista diaria */}
+        {viewMode === 'day' && (
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="text-sm sm:text-base font-semibold text-slate-800 capitalize truncate">
+              {fmtHeader.format(days[activeIndex] || weekStart)}
+            </h2>
+            <span
+              aria-live="polite"
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 shadow-sm whitespace-nowrap"
+            >
+              {count} {count === 1 ? 'clase' : 'clases'}
+            </span>
           </div>
-        ) : count === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="space-y-3">
-            {filteredSessions.map((s: Session) => {
-              const isSelected = selectedClasses.has(s.id)
-              const isInCorrectCycle = !selectionMode || s.ciclo === selectedCiclo
-              const isInCorrectOffer = !selectionMode || s.offerId === selectedOfferId
-              
-              // Debug log para verificar la validación de ofertas
-              if (selectionMode && selectedOfferId) {
-                console.log(`Validando sesión ${s.id} (${s.courseName}):`, {
-                  selectedOfferId,
-                  sessionOfferId: s.offerId,
-                  isInCorrectOffer,
-                  selectedCiclo,
-                  sessionCiclo: s.ciclo,
-                  isInCorrectCycle
+        )}
+
+        {/* Contenido según el modo de vista */}
+        {viewMode === 'day' ? (
+          /* Vista diaria - contenido original */
+          isLoading ? (
+            <div className="py-12 grid place-items-center">
+              <Spinner label="Cargando horarios..." />
+            </div>
+          ) : count === 0 ? (
+            <EmptyState />
+          ) : (
+            <div className="space-y-3">
+              {filteredSessions.map((s: Session) => {
+                const isSelected = selectedClasses.has(s.id)
+                const isInCorrectCycle = !selectionMode || s.ciclo === selectedCiclo
+                const isInCorrectOffer = !selectionMode || s.offerId === selectedOfferId
+                
+                // Debug log para verificar la validación de ofertas
+                if (selectionMode && selectedOfferId) {
+                  console.log(`Validando sesión ${s.id} (${s.courseName}):`, {
+                    selectedOfferId,
+                    sessionOfferId: s.offerId,
+                    isInCorrectOffer,
+                    selectedCiclo,
+                    sessionCiclo: s.ciclo,
+                    isInCorrectCycle
+                  })
+                }
+                
+                // Para paquetes ilimitados (cantidad_clases === 0), solo validar ciclo, oferta y rango de 30 días
+                // Para paquetes con límite, validar también el número máximo de clases
+                const sessionIdNum = parseInt(s.id)
+                const isEnrolled = sesionesInscritas.has(sessionIdNum)
+                
+                // Debug: Verificar comparación de IDs para TODAS las sesiones
+                console.log(`🔍 Sesión ${s.id} "${s.courseName}":`, {
+                  'ID original': s.id,
+                  'Tipo original': typeof s.id,
+                  'ID convertido': sessionIdNum,
+                  'Tipo convertido': typeof sessionIdNum,
+                  'Está inscrito?': isEnrolled,
+                  'Set contiene': Array.from(sesionesInscritas),
+                  'Prueba directa .has()': sesionesInscritas.has(sessionIdNum),
+                  'Prueba con string': sesionesInscritas.has(s.id as any)
                 })
-              }
-              
-              // Para paquetes ilimitados (cantidad_clases === 0), solo validar ciclo, oferta y rango de 30 días
-              // Para paquetes con límite, validar también el número máximo de clases
-              const sessionIdNum = parseInt(s.id)
-              const isEnrolled = sesionesInscritas.has(sessionIdNum)
-              
-              // Debug: Verificar comparación de IDs para TODAS las sesiones
-              console.log(`🔍 Sesión ${s.id} "${s.courseName}":`, {
-                'ID original': s.id,
-                'Tipo original': typeof s.id,
-                'ID convertido': sessionIdNum,
-                'Tipo convertido': typeof sessionIdNum,
-                'Está inscrito?': isEnrolled,
-                'Set contiene': Array.from(sesionesInscritas),
-                'Prueba directa .has()': sesionesInscritas.has(sessionIdNum),
-                'Prueba con string': sesionesInscritas.has(s.id as any)
-              })
-              
-              // Debug: Verificar comparación de IDs
-              if (isEnrolled) {
-                console.log(`✅ INSCRITO: ${s.courseName} (ID: ${sessionIdNum})`)
-              }
-              
-              let isDisabled = false
-              if (selectionMode) {
-                // Bloquear clases ya inscritas en modo selección
+                
+                // Debug: Verificar comparación de IDs
                 if (isEnrolled) {
-                  isDisabled = true
-                } else if (!isInCorrectCycle || !isInCorrectOffer) {
-                  isDisabled = true
-                } else if (!isSelected && s.cupos_disponibles === 0) {
-                  // No se puede seleccionar si no hay cupos disponibles
-                  isDisabled = true
-                } else if (!isSelected && selectedPaquete) {
-                  // Si el paquete NO es ilimitado (tiene cantidad_clases válida > 0) y ya se alcanzó el límite
-                  const isUnlimited = !selectedPaquete.cantidad_clases || selectedPaquete.cantidad_clases === 0
-                  if (!isUnlimited && selectedPaquete.cantidad_clases && selectedClasses.size >= selectedPaquete.cantidad_clases) {
+                  console.log(`✅ INSCRITO: ${s.courseName} (ID: ${sessionIdNum})`)
+                }
+                
+                let isDisabled = false
+                if (selectionMode) {
+                  // Bloquear clases ya inscritas en modo selección
+                  if (isEnrolled) {
                     isDisabled = true
+                  } else if (!isInCorrectCycle || !isInCorrectOffer) {
+                    isDisabled = true
+                  } else if (!isSelected && s.cupos_disponibles === 0) {
+                    // No se puede seleccionar si no hay cupos disponibles
+                    isDisabled = true
+                  } else if (!isSelected && selectedPaquete) {
+                    // Si el paquete NO es ilimitado (tiene cantidad_clases válida > 0) y ya se alcanzó el límite
+                    const isUnlimited = !selectedPaquete.cantidad_clases || selectedPaquete.cantidad_clases === 0
+                    if (!isUnlimited && selectedPaquete.cantidad_clases && selectedClasses.size >= selectedPaquete.cantidad_clases) {
+                      isDisabled = true
+                    }
                   }
                 }
-              }
-              
-              return (
-                <SessionRow 
-                  key={s.id} 
-                  s={s}
-                  selectionMode={selectionMode}
-                  isSelected={isSelected}
-                  onToggleSelection={handleToggleSelection}
-                  isDisabled={isDisabled}
-                  onPackageSelect={handlePackageSelect}
-                  activePromotion={activePromotion}
-                  isEnrolled={isEnrolled}
-                />
-              )
-            })}
-          </div>
+                
+                return (
+                  <SessionRow 
+                    key={s.id} 
+                    s={s}
+                    selectionMode={selectionMode}
+                    isSelected={isSelected}
+                    onToggleSelection={handleToggleSelection}
+                    isDisabled={isDisabled}
+                    onPackageSelect={handlePackageSelect}
+                    activePromotion={activePromotion}
+                    isEnrolled={isEnrolled}
+                  />
+                )
+              })}
+            </div>
+          )
+        ) : (
+          /* Vista semanal - WeeklySchedule integrado SIN modal flotante */
+          <WeeklySchedule onClose={() => setViewMode('day')} isEmbedded={true} />
         )}
       </div>
 
@@ -1318,16 +1352,6 @@ export default function Schedule() {
         onClose={() => setClassLimitError(null)}
         maxClasses={classLimitError || 0}
       />
-      
-      {/* Modal de horario semanal */}
-      {showWeeklySchedule && (
-        <WeeklySchedule onClose={() => setShowWeeklySchedule(false)} />
-      )}
-      
-      {/* Modal de cronograma por ciclo */}
-      {showCycleSchedule && (
-        <CycleSchedule onClose={() => setShowCycleSchedule(false)} />
-      )}
     </div>
   )
 }

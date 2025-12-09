@@ -7,13 +7,13 @@ async function tryOrMock<T>(call: () => Promise<T>, mock: T): Promise<T> {
 
 /** PROFESORES */
 export type ProfesorBackend = {
-  Persona_id_persona: number
+  persona_id: number
   nombre: string
-  apellido_paterno: string
-  apellido_materno: string
+  apellido_paterno: string | null
+  apellido_materno: string | null
   email: string
   celular: string
-  pais_origen: string
+  pais_origen: string | null
   descripcion: string | null
   estado: boolean
   cuando_comenzo_danza: string | null
@@ -39,7 +39,7 @@ export async function fetchProfesores(): Promise<Profesor[]> {
     
     // Transformar la respuesta del backend al formato que usa el frontend
     return profesores.map((p: ProfesorBackend) => ({
-      id: p.Persona_id_persona.toString(),
+      id: p.persona_id.toString(),
       name: `${p.nombre} ${p.apellido_paterno || ''} ${p.apellido_materno || ''}`.trim(),
       nationality: p.pais_origen || 'No especificado',
       instagram: p.redes_sociales?.instagram || p.redes_sociales || '',
@@ -53,6 +53,7 @@ export async function fetchProfesores(): Promise<Profesor[]> {
 
 export async function createProfesorTemporal(data: {
   nombre: string
+  apellido_paterno: string
   pais_origen: string
   redes_sociales: string
 }): Promise<Profesor> {
@@ -60,7 +61,7 @@ export async function createProfesorTemporal(data: {
   const p = response.data.profesor
   
   return {
-    id: p.Persona_id_persona.toString(),
+    id: p.persona_id.toString(),
     name: p.nombre,
     nationality: p.pais_origen || 'No especificado',
     instagram: p.redes_sociales || '',

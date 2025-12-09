@@ -126,7 +126,7 @@ export default function CancellationsPage() {
 
   const selected = classes.find((c: any) => c.id_sesion.toString() === form.classId)
   const selectedLabel = selected 
-    ? `${selected.estilo.nombre_estilo} ${selected.hora_inicio}–${selected.hora_fin} ${selected.profesor.nombre} ${selected.profesor.apellido_paterno} ${selected.profesor.apellido_materno} (${selected.cancelado ? 'CANCELADA' : 'ACTIVA'})`.trim()
+    ? `${selected.estilo.nombre_estilo} ${selected.hora_inicio}–${selected.hora_fin} ${selected.profesor.nombre} ${selected.profesor.apellido_paterno || ''} ${selected.profesor.apellido_materno || ''} (${selected.cancelado ? 'CANCELADA' : 'ACTIVA'})`.trim()
     : ''
 
   return (
@@ -161,7 +161,7 @@ export default function CancellationsPage() {
                 <select value={form.classId} onChange={(e) => update('classId', e.target.value)} className={`w-full rounded-xl border px-3 py-2 bg-white outline-none focus:ring-4 ${errors.classId ? 'border-red-400 focus:ring-red-100' : 'border-neutral-300 focus:ring-neutral-200'}`}>
                   <option value="">Seleccione una clase</option>
                   {classes.map((sesion: any) => {
-                    const label = `${sesion.estilo.nombre_estilo} ${sesion.hora_inicio}–${sesion.hora_fin} ${sesion.profesor.nombre} ${sesion.profesor.apellido_paterno} ${sesion.profesor.apellido_materno}${sesion.cancelado ? ' (CANCELADA)' : ''}`.trim()
+                    const label = `${sesion.estilo.nombre_estilo} ${sesion.hora_inicio}–${sesion.hora_fin} ${sesion.profesor.nombre} ${sesion.profesor.apellido_paterno || ''} ${sesion.profesor.apellido_materno || ''}${sesion.cancelado ? ' (CANCELADA)' : ''}`.trim()
                     return (
                       <option key={sesion.id_sesion} value={sesion.id_sesion.toString()}>
                         {label}

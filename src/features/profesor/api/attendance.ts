@@ -47,15 +47,15 @@ export interface Sesion {
     beneficios_estilo: string
   }
   profesor: {
-    Persona_id_persona: number
+    persona_id: number
     nombre: string
-    apellido_paterno: string
-    apellido_materno: string
+    apellido_paterno: string | null
+    apellido_materno: string | null
     email: string
-    celular: string
-    pais_origen: string
-    cuando_comenzo_danza: string
-    frase: string
+    celular: string | null
+    pais_origen: string | null
+    cuando_comenzo_danza: string | null
+    frase: string | null
     descripcion: string | null
     musica: string | null
     signo: string | null
@@ -96,16 +96,15 @@ export interface SesionesResponse {
 // ================= NEW INTERFACES FOR PROFESSOR ENDPOINTS =================
 
 export interface ProfesorInfo {
-  pais_origen: string
+  persona_id: number
+  pais_origen: string | null
   descripcion: string | null
   es_profesor: boolean
   estado: boolean
-  cuando_comenzo_danza: string
-  frase: string
-  Persona_id_persona: number
+  cuando_comenzo_danza: string | null
+  frase: string | null
   musica: string | null
-  persona_id: number
-  redes_sociales: string
+  redes_sociales: string | null
   signo: string | null
 }
 
@@ -165,7 +164,7 @@ export interface HorarioProfesor {
 
 export interface HorariosProfesorResponse {
   horarios: HorarioProfesor[]
-  profesor_id: number
+  persona_id: number
   total_horarios: number
 }
 

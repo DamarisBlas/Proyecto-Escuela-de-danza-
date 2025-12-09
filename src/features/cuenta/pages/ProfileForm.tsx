@@ -10,25 +10,34 @@ import { getPersonaDetalle, PersonaDetalleResponse } from '../api/personas'
 import ChangePassword from './ChangePassword'
 
 // cspell:ignore apellido
-type Common = { nombre: string; apellido: string; email: string; telefono: string; departamento: string; zona: string; cumpleanos: string }
-type ProfExtras = { instagram?: string; zodiacSign?: string; motivationalPhrase?: string; description?: string; preferredStyles?: string }
+type Common = { nombre: string; apellido_paterno: string; apellido_materno: string; email: string; telefono: string; departamento: string; zona: string; cumpleanos: string }
+type ProfExtras = { instagram?: string; facebook?: string; tiktok?: string; zodiacSign?: string; motivationalPhrase?: string; description?: string; preferredStyles?: string; pais_origen?: string; cuando_comenzo_danza?: string }
 type State = Common & ProfExtras
 
 export default function ProfileForm() {
   const user = useAuthStore((s) => s.user)
   const role = useRole()
   const [showChangePassword, setShowChangePassword] = useState(false)
-  const initialApellido = user?.name ? (user.name.split(' ').length > 1 ? user.name.split(' ').slice(1).join(' ') : '') : ''
+  const nameParts = user?.name ? user.name.split(' ') : []
+  const initialNombre = nameParts.length > 0 ? nameParts[0] : ''
+  const restNameParts = nameParts.length > 1 ? nameParts.slice(1) : []
+  const initialApellidoPaterno = restNameParts.length > 0 ? restNameParts[0] : ''
+  const initialApellidoMaterno = restNameParts.length > 1 ? restNameParts.slice(1).join(' ') : ''
 
   const [data, setData] = useState<State>({
-    nombre: user?.name ?? '',
-    apellido: initialApellido,
+    nombre: user?.name ?? initialNombre ?? '',
+    apellido_paterno: initialApellidoPaterno,
+    apellido_materno: initialApellidoMaterno,
     email: user?.email ?? '',
     telefono: '',
     departamento: 'La Paz',
+    pais_origen: '',
+    cuando_comenzo_danza: '',
     zona: 'Centro',
     cumpleanos: '',
     instagram: role === 'PROFESOR' ? '@' : undefined,
+    facebook: role === 'PROFESOR' ? '' : undefined,
+    tiktok: role === 'PROFESOR' ? '' : undefined,
     zodiacSign: role === 'PROFESOR' ? '' : undefined,
     motivationalPhrase: role === 'PROFESOR' ? '' : undefined,
     description: role === 'PROFESOR' ? '' : undefined,
@@ -53,16 +62,62 @@ export default function ProfileForm() {
     setData((prev) => ({
       ...prev,
       nombre: personaDetalle.nombre ?? prev.nombre,
-      apellido: personaDetalle.apellido ?? prev.apellido,
+      apellido_paterno: personaDetalle.apellido_paterno ?? prev.apellido_paterno,
+      apellido_materno: personaDetalle.apellido_materno ?? prev.apellido_materno,
       email: personaDetalle.email ?? prev.email,
       telefono: personaDetalle.celular ?? prev.telefono,
       motivationalPhrase: personaDetalle.datos_rol?.frase ?? prev.motivationalPhrase,
       description: personaDetalle.datos_rol?.descripcion ?? prev.description,
-      preferredStyles:
-        typeof personaDetalle.datos_rol?.estilos === 'string'
-          ? personaDetalle.datos_rol!.estilos!
-          : prev.preferredStyles,
-      departamento: personaDetalle.datos_rol?.cuidad ?? prev.departamento,
+      preferredStyles: prev.preferredStyles,
+      departamento: personaDetalle.datos_rol?.pais_origen ?? prev.departamento,
+      pais_origen: personaDetalle.datos_rol?.pais_origen ?? prev.pais_origen,
+      cuando_comenzo_danza: personaDetalle.datos_rol?.cuando_comenzo_danza ?? prev.cuando_comenzo_danza,
+      // Parse redes_sociales (supports object or JSON string)
+      instagram: (() => {
+        const rs: any = personaDetalle.datos_rol?.redes_sociales
+        if (!rs) return prev.instagram
+        try {
+          if (typeof rs === 'string' && rs.trim().startsWith('{')) {
+            const obj: any = JSON.parse(rs)
+            return obj.instagram || obj.ig || prev.instagram
+          }
+          if (typeof rs === 'object') {
+            const r: any = rs
+            return r.instagram || r.ig || prev.instagram
+          }
+          return String(rs)
+        } catch { return prev.instagram }
+      })(),
+      facebook: (() => {
+        const rs: any = personaDetalle.datos_rol?.redes_sociales
+        if (!rs) return prev.facebook
+        try {
+          if (typeof rs === 'string' && rs.trim().startsWith('{')) {
+            const obj: any = JSON.parse(rs)
+            return obj.facebook || obj.fb || prev.facebook
+          }
+          if (typeof rs === 'object') {
+            const r: any = rs
+            return r.facebook || r.fb || prev.facebook
+          }
+          return prev.facebook
+        } catch { return prev.facebook }
+      })(),
+      tiktok: (() => {
+        const rs: any = personaDetalle.datos_rol?.redes_sociales
+        if (!rs) return prev.tiktok
+        try {
+          if (typeof rs === 'string' && rs.trim().startsWith('{')) {
+            const obj: any = JSON.parse(rs)
+            return obj.tiktok || prev.tiktok
+          }
+          if (typeof rs === 'object') {
+            const r: any = rs
+            return r.tiktok || prev.tiktok
+          }
+          return prev.tiktok
+        } catch { return prev.tiktok }
+      })(),
     }))
   }, [personaDetalle])
 
@@ -78,8 +133,12 @@ export default function ProfileForm() {
           </div>
           
           <div>
-            <Label htmlFor="apellido">Apellido</Label>
-            <Input id="apellido" value={data.apellido} onChange={on('apellido')} />
+            <Label htmlFor="apellido-paterno">Apellido Paterno</Label>
+            <Input id="apellido-paterno" value={data.apellido_paterno} onChange={on('apellido_paterno')} />
+          </div>
+          <div>
+            <Label htmlFor="apellido-materno">Apellido Materno</Label>
+            <Input id="apellido-materno" value={data.apellido_materno} onChange={on('apellido_materno')} />
           </div>
           <div>
             <Label htmlFor="telefono">Telefono</Label>
@@ -93,14 +152,25 @@ export default function ProfileForm() {
             <Label htmlFor="cumpleanos">Cumpleaños</Label>
             <Input id="cumpleanos" type="date" value={data.cumpleanos} onChange={on('cumpleanos')} />
           </div>
-          <div>
-            <Label htmlFor="departamento">Departamento</Label>
-            <Input id="departamento" value={data.departamento} onChange={on('departamento')} />
-          </div>
-          <div>
-            <Label htmlFor="zona">Zona</Label>
-            <Input id="zona" value={data.zona} onChange={on('zona')} />
-          </div>
+          {/* Departamento - mostrarse por defecto, reemplazado por Pais de origen para profesores */}
+          {role === 'PROFESOR' ? (
+            <div>
+              <Label htmlFor="pais-origen">País de origen</Label>
+              <Input id="pais-origen" value={data.pais_origen} onChange={on('pais_origen')} />
+            </div>
+          ) : (
+            <div>
+              <Label htmlFor="departamento">Departamento</Label>
+              <Input id="departamento" value={data.departamento} onChange={on('departamento')} />
+            </div>
+          )}
+          {/* Zona no se muestra para DIRECTOR */}
+          {role !== 'DIRECTOR' && (
+            <div>
+              <Label htmlFor="zona">Zona</Label>
+              <Input id="zona" value={data.zona} onChange={on('zona')} />
+            </div>
+          )}
 
           {role === 'PROFESOR' && (
             <>
@@ -124,6 +194,20 @@ export default function ProfileForm() {
               <div className="md:col-span-2">
                 <Label htmlFor="styles">Estilos preferidos (coma separada)</Label>
                 <Input id="styles" placeholder="Dancehall, Heels, Hip Hop" value={data.preferredStyles || ''} onChange={on('preferredStyles')} />
+              </div>
+              {/* Redes sociales adicionales */}
+              <div>
+                <Label htmlFor="facebook">Facebook</Label>
+                <Input id="facebook" placeholder="Usuario o URL" value={data.facebook || ''} onChange={on('facebook')} />
+              </div>
+              <div>
+                <Label htmlFor="tiktok">TikTok</Label>
+                <Input id="tiktok" placeholder="Usuario o URL" value={data.tiktok || ''} onChange={on('tiktok')} />
+              </div>
+              {/* Pais de origen y cuando comenzo (fecha) para profesores */}
+              <div>
+                <Label htmlFor="cuando">Cuando comenzo en la danza</Label>
+                <Input id="cuando" type="date" value={data.cuando_comenzo_danza || ''} onChange={on('cuando_comenzo_danza')} />
               </div>
             </>
           )}

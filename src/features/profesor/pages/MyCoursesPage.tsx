@@ -139,11 +139,11 @@ export function MyCoursesPage() {
 
   // Query para obtener horarios del profesor
   const { data: horariosData, isLoading: loadingHorarios } = useQuery({
-    queryKey: ['horarios-profesor', profesorInfo?.Persona_id_persona],
+    queryKey: ['horarios-profesor', profesorInfo?.persona_id],
     queryFn: () => {
-      return fetchHorariosByProfesor(profesorInfo!.Persona_id_persona)
+      return fetchHorariosByProfesor(profesorInfo!.persona_id)
     },
-    enabled: !!profesorInfo?.Persona_id_persona,
+    enabled: !!profesorInfo?.persona_id,
   })
 
   // Inicializar horarios filtrados cuando se cargan los datos
