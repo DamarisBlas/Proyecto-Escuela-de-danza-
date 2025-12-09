@@ -363,7 +363,7 @@ class HorarioService:
             return {
                 "horarios": horarios_formateados,
                 "total_horarios": len(horarios_formateados),
-                "profesor_id": profesor_id
+                "persona_id": profesor_id
             }, 200
             
         except Exception as e:
@@ -423,12 +423,13 @@ class HorarioService:
 
                     # Información completa del profesor
                     "profesor": {
-                        "id_profesor": profesor.id_profesor,
+                        "persona_id": profesor.Persona_id_persona,
                         "estado": profesor.estado,
                         "persona": {
                             "id_persona": persona.id_persona,
                             "nombre": persona.nombre,
-                            "apellido": persona.apellido,
+                            "apellido_paterno": persona.apellido_paterno,
+                            "apellido_materno": persona.apellido_materno,
                             "email": persona.email,
                             "celular": persona.celular,
                             "estado": persona.estado
@@ -709,9 +710,10 @@ class HorarioService:
                     },
                     "nivel": horario.nivel,
                     "profesor": {
-                        "id_profesor": profesor.id_profesor,
+                        "persona_id": profesor.Persona_id_persona,
                         "nombre": persona.nombre,
-                        "apellido": persona.apellido
+                        "apellido_paterno": persona.apellido_paterno,
+                        "apellido_materno": persona.apellido_materno
                     },
                     "sala": {
                         "id_sala": sala.id_sala,

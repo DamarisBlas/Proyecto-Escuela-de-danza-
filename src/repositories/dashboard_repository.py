@@ -242,9 +242,10 @@ class DashboardRepository:
         Obtiene los profesores más populares por asistencia
         """
         resultados = db.session.query(
-            Profesor.id_profesor,
+            Profesor.Persona_id_persona.label('id_profesor'),
             Persona.nombre,
-            Persona.apellido,
+            Persona.apellido_paterno,
+            Persona.apellido_materno,
             func.count(Asistencia.id_asistencia).label('total_asistencias'),
             func.avg(
                 case(
@@ -255,7 +256,7 @@ class DashboardRepository:
         ).join(
             Persona, Profesor.Persona_id_persona == Persona.id_persona
         ).join(
-            Horario, Profesor.id_profesor == Horario.Profesor_id_profesor
+            Horario, Profesor.Persona_id_persona == Horario.Profesor_id_profesor
         ).join(
             HorarioSesion, Horario.id_horario == HorarioSesion.Horario_id_horario
         ).join(
@@ -267,9 +268,10 @@ class DashboardRepository:
             Asistencia.estado == True,
             Profesor.estado == True
         ).group_by(
-            Profesor.id_profesor,
+            Profesor.Persona_id_persona,
             Persona.nombre,
-            Persona.apellido
+            Persona.apellido_paterno,
+            Persona.apellido_materno
         ).order_by(
             func.count(Asistencia.id_asistencia).desc()
         ).limit(limit).all()
@@ -277,7 +279,7 @@ class DashboardRepository:
         profesores = [
             {
                 'id_profesor': r.id_profesor,
-                'nombre_completo': f"{r.nombre} {r.apellido}",
+                'nombre_completo': f"{r.nombre} {r.apellido_paterno or ''} {r.apellido_materno or ''}".strip(),
                 'total_asistencias': r.total_asistencias,
                 'tasa_asistencia': round(float(r.tasa_asistencia or 0), 2)
             }

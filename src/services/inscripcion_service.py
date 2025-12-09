@@ -122,7 +122,8 @@ class InscripcionService:
                         "persona": {
                             "id_persona": persona.id_persona,
                             "nombre": persona.nombre,
-                            "apellido": persona.apellido,
+                            "apellido_paterno": persona.apellido_paterno,
+                            "apellido_materno": persona.apellido_materno,
                             "email": persona.email,
                             "celular": persona.celular
                         },
@@ -702,7 +703,8 @@ class InscripcionService:
                     "persona": {
                         "id_persona": persona.id_persona,
                         "nombre": persona.nombre,
-                        "apellido": persona.apellido,
+                        "apellido_paterno": persona.apellido_paterno,
+                        "apellido_materno": persona.apellido_materno,
                         "email": persona.email,
                         "celular": persona.celular,
                         "estado": persona.estado

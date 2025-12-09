@@ -14,9 +14,10 @@ class ProfesorService:
             profesores_data = []
             for profesor, persona in profesores:
                 profesores_data.append({
-                    "id_profesor": profesor.id_profesor,
+                    "persona_id": profesor.Persona_id_persona,
                     "nombre": persona.nombre,
-                    "apellido": persona.apellido,
+                    "apellido_paterno": persona.apellido_paterno,
+                    "apellido_materno": persona.apellido_materno,
                     "email": persona.email,
                     "celular": persona.celular,
                     "frase": profesor.frase,
@@ -48,9 +49,10 @@ class ProfesorService:
             profesores_data = []
             for profesor, persona in profesores:
                 profesores_data.append({
-                    "id_profesor": profesor.id_profesor,
+                    "persona_id": profesor.Persona_id_persona,
                     "nombre": persona.nombre,
-                    "apellido": persona.apellido,
+                    "apellido_paterno": persona.apellido_paterno,
+                    "apellido_materno": persona.apellido_materno,
                     "email": persona.email,
                     "celular": persona.celular,
                     "frase": profesor.frase,
@@ -82,9 +84,10 @@ class ProfesorService:
             profesores_data = []
             for profesor, persona in profesores:
                 profesores_data.append({
-                    "id_profesor": profesor.id_profesor,
+                    "id_profesor": profesor.Persona_id_persona,
                     "nombre": persona.nombre,
-                    "apellido": persona.apellido,
+                    "apellido_paterno": persona.apellido_paterno,
+                    "apellido_materno": persona.apellido_materno,
                     "email": persona.email,
                     "celular": persona.celular,
                     "frase": profesor.frase,
@@ -116,9 +119,10 @@ class ProfesorService:
             profesor, persona = result
             
             profesor_data = {
-                "id_profesor": profesor.id_profesor,
+                "persona_id": profesor.Persona_id_persona,
                 "nombre": persona.nombre,
-                "apellido": persona.apellido,
+                "apellido_paterno": persona.apellido_paterno,
+                "apellido_materno": persona.apellido_materno,
                 "email": persona.email,
                 "celular": persona.celular,
                 "frase": profesor.frase,
@@ -149,7 +153,8 @@ class ProfesorService:
             # Crear persona temporal
             persona_data = {
                 'nombre': data.get('nombre'),
-                'apellido': data.get('apellido'),
+                'apellido_paterno': data.get('apellido_paterno'),
+                'apellido_materno': data.get('apellido_materno'),
                 'email': None,
                 'celular': None,
                 'password': None,
@@ -166,8 +171,8 @@ class ProfesorService:
                 'frase': data.get('frase'),
                 'descripcion': data.get('descripcion'),
                 'redes_sociales': data.get('redes_sociales'),
-                'cuidad': data.get('cuidad'),
-                'experiencia': data.get('experiencia'),
+                'pais_origen': data.get('pais_origen'),
+                'cuando_comenzo_danza': data.get('cuando_comenzo_danza'),
                 'signo': data.get('signo'),
                 'musica': data.get('musica'),
                 
@@ -179,9 +184,10 @@ class ProfesorService:
             return {
                 "message": "Profesor temporal creado exitosamente",
                 "profesor": {
-                    "id_profesor": profesor.id_profesor,
+                    "persona_id": profesor.Persona_id_persona,
                     "nombre": persona.nombre,
-                    "apellido": persona.apellido,
+                    "apellido_paterno": persona.apellido_paterno,
+                    "apellido_materno": persona.apellido_materno,
                     "redes_sociales": profesor.redes_sociales,
                     "pais_origen": profesor.pais_origen,
                     "cuando_comenzo_danza": profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
@@ -213,8 +219,10 @@ class ProfesorService:
             persona_updates = {}
             if 'nombre' in data:
                 persona_updates['nombre'] = data['nombre']
-            if 'apellido' in data:
-                persona_updates['apellido'] = data['apellido']
+            if 'apellido_paterno' in data:
+                persona_updates['apellido_paterno'] = data['apellido_paterno']
+            if 'apellido_materno' in data:
+                persona_updates['apellido_materno'] = data['apellido_materno']
             if 'email' in data:
                 persona_updates['email'] = data['email']
             if 'celular' in data:
@@ -225,7 +233,7 @@ class ProfesorService:
             
             # Actualizar datos de profesor
             profesor_updates = {}
-            campos_profesor = ['frase', 'descripcion', 'redes_sociales', 'cuidad', 
+            campos_profesor = ['frase', 'descripcion', 'redes_sociales', 
                               'pais_origen', 'cuando_comenzo_danza', 'signo', 'musica']
             
             for campo in campos_profesor:
@@ -242,9 +250,10 @@ class ProfesorService:
             return {
                 "message": "Profesor actualizado exitosamente",
                 "profesor": {
-                    "id_profesor": profesor_updated.id_profesor,
+                    "persona_id": profesor_updated.Persona_id_persona,
                     "nombre": persona_updated.nombre,
-                    "apellido": persona_updated.apellido,
+                    "apellido_paterno": persona_updated.apellido_paterno,
+                    "apellido_materno": persona_updated.apellido_materno,
                     "email": persona_updated.email,
                     "celular": persona_updated.celular,
                     "frase": profesor_updated.frase,
@@ -308,7 +317,6 @@ class ProfesorService:
             # Si existe, devolver los datos del profesor
             profesor_data = {
                 "es_profesor": True,
-                "id_profesor": profesor.id_profesor,
                 "persona_id": profesor.Persona_id_persona,
                 "frase": profesor.frase,
                 "descripcion": profesor.descripcion,

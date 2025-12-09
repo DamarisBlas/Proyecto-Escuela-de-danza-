@@ -184,7 +184,7 @@ class HorarioRepository:
             Programa,
             func.coalesce(subquery_inscritos.c.total_inscritos, 0).label('total_inscritos')
         ).join(
-            Profesor, Horario.Profesor_id_profesor == Profesor.id_profesor
+            Profesor, Horario.Profesor_id_profesor == Profesor.Persona_id_persona
         ).join(
             Persona, Profesor.Persona_id_persona == Persona.id_persona  # Join con Persona del profesor
         ).join(

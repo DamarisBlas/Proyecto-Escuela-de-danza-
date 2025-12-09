@@ -23,6 +23,7 @@ class DirectorService:
                 email=director_data['email'],
                 celular=director_data.get('celular'),
                 password=generate_password_hash(director_data['password']),
+                tipo_cuenta='director',  # Establecer tipo de cuenta como director
                 fecha_creacion=datetime.now(),
                 solicitud_user_especial=True  # Los directores son usuarios especiales
             )

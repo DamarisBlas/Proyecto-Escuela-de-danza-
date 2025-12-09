@@ -13,15 +13,15 @@ class ProfesorRepository:
     
     @staticmethod
     def get_by_id(profesor_id):
-        """Obtiene un profesor por ID"""
-        return Profesor.query.filter_by(id_profesor=profesor_id).first()
+        """Obtiene un profesor por ID (Persona_id_persona)"""
+        return Profesor.query.filter_by(Persona_id_persona=profesor_id).first()
     
     @staticmethod
     def get_profesor_with_persona(profesor_id):
         """Obtiene un profesor con su información de persona"""
         return db.session.query(Profesor, Persona).join(
             Persona, Profesor.Persona_id_persona == Persona.id_persona
-        ).filter(Profesor.id_profesor == profesor_id).first()
+        ).filter(Profesor.Persona_id_persona == profesor_id).first()
     
     @staticmethod
     def get_active():
@@ -81,7 +81,7 @@ class ProfesorRepository:
     @staticmethod
     def delete(profesor_id):
         """Eliminación lógica de un profesor"""
-        profesor = Profesor.query.filter_by(id_profesor=profesor_id).first()
+        profesor = Profesor.query.filter_by(Persona_id_persona=profesor_id).first()
         if profesor:
             profesor.estado = False
             db.session.commit()

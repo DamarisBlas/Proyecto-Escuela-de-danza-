@@ -257,19 +257,19 @@ class HorarioSesionService:
                     
                     # Datos del profesor
                     "profesor": {
-                        "id_profesor": profesor.id_profesor,
+                        "persona_id": profesor.Persona_id_persona,
                         "nombre": persona.nombre,
-                        "apellido": persona.apellido,
+                        "apellido_paterno": persona.apellido_paterno,
+                        "apellido_materno": persona.apellido_materno,
                         "email": persona.email,
                         "celular": persona.celular,
                         "redes_sociales": redes_sociales,
                         "frase": profesor.frase,
                         "descripcion": profesor.descripcion,
-                        "ciudad": profesor.cuidad,
-                        "experiencia": profesor.experiencia,
+                        "pais_origen": profesor.pais_origen,
+                        "cuando_comenzo_danza": profesor.cuando_comenzo_danza.isoformat() if profesor.cuando_comenzo_danza else None,
                         "signo": profesor.signo,
-                        "musica_favorita": profesor.musica,
-                        "estilos": profesor.estilos
+                        "musica_favorita": profesor.musica
                     },
                     
                     # Datos de la sala
@@ -318,7 +318,8 @@ class HorarioSesionService:
             persona_data = persona_profesor.to_dict()
             profesor_info['persona'] = {
                 'nombre': persona_data.get('nombre'),
-                'apellido': persona_data.get('apellido'), 
+                'apellido_paterno': persona_data.get('apellido_paterno'),
+                'apellido_materno': persona_data.get('apellido_materno'),
                 'celular': persona_data.get('celular'),
                 'email': persona_data.get('email')
             }
@@ -420,7 +421,7 @@ class HorarioSesionService:
             ).join(
                 Sala, Horario.Sala_id_sala == Sala.id_sala
             ).join(
-                Profesor, Horario.Profesor_id_profesor == Profesor.id_profesor
+                Profesor, Horario.Profesor_id_profesor == Profesor.Persona_id_persona
             ).join(
                 Persona, Profesor.Persona_id_persona == Persona.id_persona
             ).join(
@@ -510,9 +511,10 @@ class HorarioSesionService:
                     
                     # Información del profesor
                     "profesor": {
-                        "id_profesor": profesor.id_profesor,
+                        "persona_id": profesor.Persona_id_persona,
                         "nombre": persona.nombre,
-                        "apellido": persona.apellido,
+                        "apellido_paterno": persona.apellido_paterno,
+                        "apellido_materno": persona.apellido_materno,
                         "email": persona.email,
                         "celular": persona.celular
                     },

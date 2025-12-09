@@ -88,7 +88,7 @@ class HorarioSesionRepository:
         ).join(
             Estilo, Horario.Estilo_id_estilo == Estilo.id_estilo
         ).join(
-            Profesor, Horario.Profesor_id_profesor == Profesor.id_profesor
+            Profesor, Horario.Profesor_id_profesor == Profesor.Persona_id_persona
         ).join(
             Persona, Profesor.Persona_id_persona == Persona.id_persona
         ).join(

@@ -75,7 +75,7 @@ class PersonaRepository:
     @staticmethod
     def search_by_name(nombre=None, apellido=None):
         """
-        Busca personas por nombre y/o apellido
+        Busca personas por nombre y/o apellido (busca en apellido_paterno o apellido_materno)
         """
         query = Persona.query.filter_by(estado=True)
         
@@ -83,7 +83,13 @@ class PersonaRepository:
             query = query.filter(Persona.nombre.ilike(f'%{nombre}%'))
         
         if apellido:
-            query = query.filter(Persona.apellido.ilike(f'%{apellido}%'))
+            # Buscar en apellido_paterno o apellido_materno
+            query = query.filter(
+                db.or_(
+                    Persona.apellido_paterno.ilike(f'%{apellido}%'),
+                    Persona.apellido_materno.ilike(f'%{apellido}%')
+                )
+            )
         
         return query.all()
 
