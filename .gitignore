@@ -59,6 +59,42 @@ src/ml/data/*.xlsx
 src/ml/data/*.xls
 src/ml/data/*.csv
 
+# ============================================
+# MACHINE LEARNING MODULE - EXCLUIR COMPLETAMENTE
+# ============================================
+
+# Toda la carpeta ML
+src/ml/
+
+# Servicio ML
+src/services/ml_service.py
+
+# Rutas ML
+src/routes/ml_routes.py
+
+# Archivos de configuración y dependencias ML
+requirements_ml.txt
+install_ml_dependencies.ps1
+
+# Scripts de entrenamiento ML
+train_ml.py
+train_models_direct.py
+train_models_api.py
+generate_synthetic_data.py
+check_data.py
+
+# Documentación ML
+ENDPOINTS_ML_FRONTEND.md
+DOCUMENTACION_ML_SIMPLE.md
+DATA_INSUFFICIENTE_README.md
+INICIO_RAPIDO_ML.md
+
+# Tests ML
+test_ml.py
+
+# Carpeta de modelos entrenados
+models/
+
 # Cache
 .cache/
 *.cache
@@ -67,3 +103,11 @@ src/ml/data/*.csv
 .pytest_cache/
 .coverage
 htmlcov/
+
+
+scripts\test_ml_predictions.py
+.env
+test_stripe.http
+STRIPE_FRONTEND_GUIDE.md
+requirements_ml.txt
+schema_backup_2025-12-06.txt
