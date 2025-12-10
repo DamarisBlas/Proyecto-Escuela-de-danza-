@@ -50,8 +50,7 @@ Thumbs.db
 Desktop.ini
 
 # Uploads (archivos subidos por usuarios)
-uploads/*
-!uploads/.gitkeep
+
 
 # ML Models (archivos grandes, entrenar en servidor)
 src/ml/models/*.pkl
