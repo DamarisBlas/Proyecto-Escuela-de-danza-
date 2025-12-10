@@ -10,7 +10,6 @@ import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { crearNotificacionInscripcion } from '@features/cuenta/api/notificaciones'
 import qrImage from '@assets/qr/qr.jpg'
-import { StripePaymentWrapper } from '../components/StripePaymentWrapper'
 
 // Tipos para métodos de pago
 interface MetodoPago {
@@ -109,8 +108,8 @@ export default function CartPage() {
 
   // Permite pagos a cuotas si al menos un item tiene más de 1 clase seleccionada
   const permiteCuotasBase = items.some(item => (item.clasesSeleccionadas?.length || 0) > 1)
-  // Solo permitimos cuotas si al menos un item tiene más de 1 clase seleccionada Y el método es efectivo
-  const permiteCuotas = permiteCuotasBase && paymentMethod === 'efectivo'
+  // Solo permitimos cuotas si al menos un item tiene más de 1 clase seleccionada
+  const permiteCuotas = permiteCuotasBase
 
   // Calcular montos por cuota en función del total y el número de cuotas seleccionado
   // Distribuimos el total redondeado en bolivianos enteros entre las cuotas (sin decimales)
@@ -127,19 +126,12 @@ export default function CartPage() {
     setInstallmentAmount(arr[0]?.amount || '0')
   }, [items, installments])
 
-  // Si las cuotas dejan de estar permitidas (p.ej. carrito no tiene paquetes aptos o método no es efectivo), forzar pago único
+  // Si las cuotas dejan de estar permitidas (p.ej. carrito no tiene paquetes aptos), forzar pago único
   useEffect(() => {
     if (!permiteCuotas && paymentMode === 'installments') {
       setPaymentMode('single')
     }
   }, [permiteCuotas, paymentMode])
-
-  // Si se selecciona tarjeta o QR, forzar pago único
-  useEffect(() => {
-    if ((paymentMethod === 'tarjeta' || paymentMethod === 'qr') && paymentMode === 'installments') {
-      setPaymentMode('single')
-    }
-  }, [paymentMethod, paymentMode])
 
   const handleProceedToPayment = async () => {
     if (!paymentMethod) {
@@ -159,17 +151,15 @@ export default function CartPage() {
     // Obtener el ID del método de pago seleccionado
     const metodoPagoId = getMetodoPagoId(paymentMethod)
     if (!metodoPagoId) {
-      toast.error('Error al obtener el método de pago seleccionado')
+      toast.error('Error al obtener el método de pago seleccionado', {
+        style: { background: '#FEF2F2', color: '#B91C1C', border: '1px solid #FECACA' }
+      })
       return
     }
 
-    // Si es tarjeta o QR, no procesar aquí (Stripe lo maneja)
-    if (paymentMethod === 'tarjeta' || paymentMethod === 'qr') {
-      // El pago se procesa en Stripe, aquí solo mostramos el formulario
-      return
-    }
+    // No bloquear cuotas por método (incluyendo QR). La lógica de bloqueos se basa en si los items
+    // en el carrito permiten cuotas (paquetes con más de una clase).
 
-    // Solo para efectivo
     setIsProcessing(true)
     
     try {
@@ -286,81 +276,6 @@ export default function CartPage() {
     } finally {
       setIsProcessing(false)
     }
-  }
-
-  const handleStripeSuccess = async (paymentIntentId: string) => {
-    if (!user) {
-      toast.error('Debes iniciar sesión')
-      return
-    }
-
-    const metodoPagoId = getMetodoPagoId(paymentMethod || 'tarjeta')
-    if (!metodoPagoId) {
-      toast.error('Error al obtener método de pago')
-      return
-    }
-
-    try {
-      // Crear inscripciones con payment_intent_id
-      for (const item of items) {
-        if (!item.paqueteId || !item.clasesSeleccionadas?.length || !item.fechaPrimeraClase) {
-          console.error('❌ Item inválido:', item)
-          continue
-        }
-
-        const inscripcionData: any = {
-          Persona_id_persona: parseInt(user.id),
-          Paquete_id_paquete: item.paqueteId,
-          fecha_inscripcion: new Date().toISOString().split('T')[0],
-          fecha_inicio: item.fechaPrimeraClase.split('T')[0],
-          metodo_pago_id: metodoPagoId,
-          payment_intent_id: paymentIntentId,
-          clases_seleccionadas: item.clasesSeleccionadas,
-          ...(paymentMode === 'installments' ? {
-            pago_a_cuotas: true,
-            numero_cuotas: installments,
-            montos_cuotas: installmentsArray.map(a => parseFloat(a.amount))
-          } : {
-            pago_a_cuotas: false
-          })
-        }
-
-        console.log('📡 Creando inscripción con Stripe:', inscripcionData)
-        try {
-          const response = await api.post('/inscripciones', inscripcionData)
-          
-          try {
-            const personaId = parseInt(user.id)
-            const inscripcionId = response.data.id_inscripcion || response.data.inscripcion?.id_inscripcion
-            const nombreCurso = item.title || 'Curso'
-            const cantidadClases = item.clasesSeleccionadas?.length || 0
-            
-            await crearNotificacionInscripcion(personaId, inscripcionId, nombreCurso, cantidadClases)
-          } catch (notifError) {
-            console.error('Error creando notificación:', notifError)
-          }
-        } catch (inscripcionError: any) {
-          console.error('❌ Error al crear inscripción:', inscripcionError)
-          console.error('📋 Datos enviados:', inscripcionData)
-          console.error('🔍 Respuesta del servidor:', inscripcionError.response?.data)
-          throw inscripcionError
-        }
-      }
-
-      await queryClient.invalidateQueries({ queryKey: ['inscripciones', user.id] })
-      await queryClient.invalidateQueries({ queryKey: ['notificaciones', user.id] })
-      
-      // NO limpiar el carrito aquí - esperar a que Stripe confirme y redirija
-      // clear() se ejecutará en la página /pago-exitoso
-      
-    } catch (error) {
-      console.error('Error al procesar inscripciones con Stripe:', error)
-      throw error // Re-lanzar para que StripeCheckoutForm no continúe
-    }
-  }
-
-  const handleStripeError = (error: string) => {
-    toast.error(`Error en el pago: ${error}`)
   }
 
   return (
@@ -649,21 +564,6 @@ export default function CartPage() {
                   )}
                 </div>
 
-                {/* Formulario de Stripe para tarjeta/QR */}
-                {(paymentMethod === 'tarjeta' || paymentMethod === 'qr') && total() > 0 && getMetodoPagoId(paymentMethod) && (
-                  <div className="mt-4">
-                    <StripePaymentWrapper
-                      key={paymentMethod}
-                      amount={total()}
-                      paymentMethodType={paymentMethod === 'tarjeta' ? 'card' : 'cashapp'}
-                      metodoPagoId={getMetodoPagoId(paymentMethod) || 0}
-                      numeroCuota={1}
-                      onSuccess={handleStripeSuccess}
-                      onError={handleStripeError}
-                    />
-                  </div>
-                )}
-
                 {/* Modo de pago */}
                 <div className="space-y-3 pt-1 mb-4">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -731,7 +631,15 @@ export default function CartPage() {
                           ))}
                         </ul>
                         <p className="text-[11px] text-slate-500 pt-1">
-                          Pagarás cada cuota en efectivo al iniciar una clase en la escuela.
+                          {paymentMethod === 'tarjeta' && (
+                            <>Solo se cobrará la primera cuota hoy. Las siguientes se cargarán automáticamente a tu tarjeta en las fechas programadas.</>
+                          )}
+                          {paymentMethod === 'efectivo' && (
+                            <>Pagarás cada cuota en efectivo al iniciar una clase en la escuela.</>
+                          )}
+                          {paymentMethod === 'qr' && (
+                            <>Con QR, podrás pagar la primera cuota al confirmar (se generará un cobro/QR). Las siguientes cuotas quedarán como pendientes y podrás pagarlas por QR o en sede según lo acordado con la escuela.</>
+                          )}
                         </p>
                       </div>
                     </div>
@@ -745,16 +653,13 @@ export default function CartPage() {
                   >
                     Vaciar carrito
                   </Button>
-                  {/* Solo mostrar botón para efectivo, Stripe maneja tarjeta/QR */}
-                  {paymentMethod === 'efectivo' && (
-                    <Button 
-                      onClick={handleProceedToPayment}
-                      disabled={!paymentMethod || isProcessing || loadingMetodos || (paymentMode === 'installments' && !permiteCuotas)}
-                      className="w-full sm:flex-1"
-                    >
-                      {isProcessing ? 'Procesando...' : loadingMetodos ? 'Cargando...' : 'Confirmar inscripción'}
-                    </Button>
-                  )}
+                  <Button 
+                    onClick={handleProceedToPayment}
+                    disabled={!paymentMethod || isProcessing || loadingMetodos || (paymentMode === 'installments' && !permiteCuotas)}
+                    className="w-full sm:flex-1"
+                  >
+                    {isProcessing ? 'Procesando...' : loadingMetodos ? 'Cargando...' : 'Proceder al pago'}
+                  </Button>
                 </div>
               </div>
             </Card>

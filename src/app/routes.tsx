@@ -49,6 +49,7 @@ import UsersAdminPage from '@/features/director/pages/UsersAdminPage'
 import PermissionsAdminPage from '@/features/director/pages/PermissionsAdminPage'
 import SchoolInfoPage from '@/features/director/pages/SchoolInfoPage'
 import DiscountsPage from '@/features/director/pages/Discounts'
+import PagoExitosoPage from '@/features/carrito/pages/PagoExitosoPage'
 
 export const router = createBrowserRouter([
   {
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { path: 'promociones', element: <PromotionsPage /> },
     
       { path: 'carrito', element: <CartPage /> },
+      { path: 'pago-exitoso', element: <PagoExitosoPage /> },
       { path: 'auth/login', element: <LoginPage /> },
       { path: 'auth/register', element: <RegisterPage /> },
 

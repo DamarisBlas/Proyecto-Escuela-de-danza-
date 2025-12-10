@@ -328,7 +328,7 @@ export default function PaymentsAdminPage(): JSX.Element {
     <section className="bg-white rounded-3xl shadow-lg border border-slate-200 p-4 sm:p-6 space-y-4">
       <header className="space-y-1">
         <h1 className="text-sm font-semibold text-graphite flex items-center gap-2">
-          💳 Pagos y cuotas
+          Pagos y cuotas
         </h1>
         <p className="text-xs text-slate-500">Busca por alumno. Filtra por ciclo, programa, oferta y estado para encontrar pagos a revisar.</p>
       </header>

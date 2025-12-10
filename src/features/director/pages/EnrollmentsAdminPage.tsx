@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Filters, Table, Detail, type HorarioItem, type Student } from "./componentsEnrollments";
+import { env } from "@/config/env";
 
 
 

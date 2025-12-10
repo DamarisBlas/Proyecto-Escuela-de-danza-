@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import { env } from '@/config/env';
+import MachineLearning from '../components/MachineLearning';
 
 // ────────────────────────────────────────────────────────────────────────────────
 // TIPOS
@@ -332,6 +333,9 @@ export default function DashboardPage() {
           </div>
         )}
       </section>
+
+      {/* Machine Learning Dashboard */}
+    
     </div>
   );
 }

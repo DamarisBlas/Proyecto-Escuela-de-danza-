@@ -1,5 +1,10 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Button } from "@components/ui/Button";
+import Table, { TableColumn } from '@/components/ui/Table'
+import { Switch } from '@components/ui/switch'
+import { Pencil, Trash2 } from 'lucide-react'
+import { env } from "@/config/env";
+import { toast } from 'sonner';
 
 type Role = "ALUMNO" | "FEMME" | "PROFESOR" | "DIRECTOR";
 type UserRow = { 
@@ -11,6 +16,9 @@ type UserRow = {
   celular?: string;
   solicitud_user_especial?: boolean;
   tipo_cuenta?: string | null;
+  apellido_paterno?: string;
+  apellido_materno?: string;
+  password?: string;
 };
 
 function classNames(...c: any[]) {
@@ -48,13 +56,15 @@ export default function UsersAdminPage() {
         if (Array.isArray(data)) {
           const transformedUsers: UserRow[] = data.map((persona: any) => ({
             id: String(persona.id_persona),
-            name: `${persona.nombre} ${persona.apellido}`,
+            name: `${persona.nombre} ${persona.apellido_paterno || ''} ${persona.apellido_materno || ''}`.trim(),
             email: persona.email,
             role: determineRole(persona),
-            active: persona.estado,
+            active: persona.tipo_cuenta_info?.estado ?? persona.estado ?? false,
             celular: persona.celular,
             solicitud_user_especial: persona.solicitud_user_especial,
-            tipo_cuenta: persona.tipo_cuenta
+            tipo_cuenta: persona.tipo_cuenta,
+            apellido_paterno: persona.apellido_paterno,
+            apellido_materno: persona.apellido_materno
           }));
 
           setUsers(transformedUsers);
@@ -83,12 +93,33 @@ export default function UsersAdminPage() {
 
   // Simple local helpers
   function openCreate() {
-    setEdit({ id: `t-${Date.now()}`, name: "", email: "", role: "ALUMNO", active: true, __isNew: true });
+    setEdit({ 
+      id: `t-${Date.now()}`, 
+      name: "", 
+      email: "", 
+      role: "ALUMNO", 
+      active: true, 
+      apellido_paterno: "",
+      apellido_materno: "",
+      password: "",
+      __isNew: true 
+    });
     setOpen(true);
   }
 
   function openEdit(u: UserRow) {
-    setEdit({ ...u });
+    // Extraer apellido paterno y materno del nombre completo si no están separados
+    const nameParts = u.name.split(' ');
+    const nombre = nameParts[0] || '';
+    const apellido_paterno = nameParts[1] || '';
+    const apellido_materno = nameParts.slice(2).join(' ') || '';
+    
+    setEdit({ 
+      ...u, 
+      name: nombre,
+      apellido_paterno: u.apellido_paterno || apellido_paterno,
+      apellido_materno: u.apellido_materno || apellido_materno
+    });
     setOpen(true);
   }
 
@@ -102,54 +133,102 @@ export default function UsersAdminPage() {
     if (!edit) return;
 
     try {
-      // Split name into nombre and apellido
-      const nameParts = edit.name.trim().split(' ');
-      const nombre = nameParts[0] || '';
-      const apellido = nameParts.slice(1).join(' ') || '';
+      if (edit.__isNew) {
+        // Crear nuevo usuario
+        // Map role to tipo_cuenta
+        let tipo_cuenta: string = 'alumno'; // default
+        if (edit.role === 'PROFESOR') tipo_cuenta = 'profesor';
+        else if (edit.role === 'DIRECTOR') tipo_cuenta = 'director';
+        else if (edit.role === 'ALUMNO') tipo_cuenta = 'alumno';
+        else if (edit.role === 'FEMME') tipo_cuenta = 'femme';
 
-      // Map role to tipo_cuenta
-      let tipo_cuenta: string | null = null;
-      if (edit.role === 'PROFESOR') tipo_cuenta = 'profesor';
-      else if (edit.role === 'DIRECTOR') tipo_cuenta = 'director';
-      else if (edit.role === 'ALUMNO') tipo_cuenta = 'alumno';
-      else if (edit.role === 'FEMME') tipo_cuenta = 'femme';
-
-      const payload = {
-        nombre,
-        apellido,
-        email: edit.email,
-        celular: edit.celular || '',
-        tipo_cuenta
-      };
-
-      const response = await fetch(`${env.API_URL}/users/personas/${edit.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Update local state with response data
-      if (data.persona) {
-        const updatedUser: UserRow = {
-          id: String(data.persona.id_persona),
-          name: `${data.persona.nombre} ${data.persona.apellido}`,
-          email: data.persona.email,
-          role: determineRole(data.persona),
-          active: data.persona.estado,
-          celular: data.persona.celular,
-          solicitud_user_especial: data.persona.solicitud_user_especial,
-          tipo_cuenta: data.persona.tipo_cuenta
+        const payload = {
+          nombre: edit.name,
+          apellido_paterno: edit.apellido_paterno || '',
+          apellido_materno: edit.apellido_materno || '',
+          email: edit.email,
+          password: edit.password || '',
+          celular: edit.celular || '',
+          tipo_cuenta
         };
 
-        setUsers((s) => s.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+        const response = await fetch(`${env.API_URL}/users/crearusuariosdesdeadmin`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Show success toast
+        toast.success(`Usuario ${edit.role.toLowerCase()} creado exitosamente`);
+
+        // Add to local state (assuming the response includes user data)
+        if (data.user_id) {
+          const newUser: UserRow = {
+            id: String(data.user_id),
+            name: `${edit.name} ${edit.apellido_paterno || ''} ${edit.apellido_materno || ''}`.trim(),
+            email: edit.email,
+            role: edit.role,
+            active: data.estado_rol ?? true,
+            celular: edit.celular,
+            tipo_cuenta: data.tipo_cuenta,
+            apellido_paterno: edit.apellido_paterno,
+            apellido_materno: edit.apellido_materno
+          };
+
+          setUsers((s) => [...s, newUser]);
+        }
+      } else {
+        // Editar usuario existente
+        const payload = {
+          nombre: edit.name,
+          apellido_paterno: edit.apellido_paterno || '',
+          apellido_materno: edit.apellido_materno || '',
+          email: edit.email,
+          celular: edit.celular || ''
+        };
+
+        const response = await fetch(`${env.API_URL}/users/personas/${edit.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Show success toast
+        toast.success(data.message || 'Usuario actualizado exitosamente');
+
+        // Update local state with response data
+        if (data.persona) {
+          const updatedUser: UserRow = {
+            id: String(data.persona.id_persona),
+            name: `${data.persona.nombre} ${data.persona.apellido_paterno || ''} ${data.persona.apellido_materno || ''}`.trim(),
+            email: data.persona.email,
+            role: determineRole(data.persona),
+            active: data.persona.tipo_cuenta_info?.estado ?? data.persona.estado ?? false,
+            celular: data.persona.celular,
+            solicitud_user_especial: data.persona.solicitud_user_especial,
+            tipo_cuenta: data.persona.tipo_cuenta,
+            apellido_paterno: data.persona.apellido_paterno,
+            apellido_materno: data.persona.apellido_materno
+          };
+
+          setUsers((s) => s.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+        }
       }
 
       setEdit(null);
@@ -162,46 +241,60 @@ export default function UsersAdminPage() {
 
   async function toggleActiveLocal(id: string) {
     const user = users.find(u => u.id === id);
-    if (!user || user.role !== 'PROFESOR') return;
+    if (!user) {
+      console.error('Usuario no encontrado:', id);
+      return;
+    }
+
+    const habilitar = !user.active;
+    console.log('Toggle status para usuario:', user.name, 'ID:', id, 'Nuevo estado:', habilitar);
 
     try {
-      const payload = {
-        tipo_cuenta: "profesor",
-        activar: !user.active
-      };
-
-      const response = await fetch(`${env.API_URL}/users/personas/${id}`, {
+      const response = await fetch(`${env.API_URL}/users/personas/${id}/toggle-status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ habilitar })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error en respuesta del servidor:', response.status, errorText);
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Respuesta del servidor:', data);
+
+      // The endpoint returns the new estado in `estado` or `tipo_cuenta_info.estado`
+      const nuevoEstado = data.tipo_cuenta_info?.estado ?? data.estado ?? habilitar;
+      console.log('Nuevo estado calculado:', nuevoEstado);
+
+      setUsers((s) => s.map((u) => (u.id === id ? { ...u, active: nuevoEstado } : u)));
+      console.log('Estado local actualizado para usuario:', id);
+    } catch (err) {
+      console.error('Error al activar/desactivar usuario (toggle-status):', err);
+      alert('Error al cambiar el estado del usuario. Intenta de nuevo.');
+    }
+  }
+
+  // Delete user handler (UI + API). Removes locally on success.
+  async function handleDeleteUser(u: UserRow) {
+    if (!confirm(`Eliminar usuario ${u.name}? Esta acción no se puede deshacer.`)) return;
+
+    try {
+      const response = await fetch(`${env.API_URL}/users/personas/${u.id}`, {
+        method: 'DELETE'
       });
 
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status}`);
       }
 
-      const data = await response.json();
-
-      // Update local state with response data
-      if (data.persona) {
-        const updatedUser: UserRow = {
-          id: String(data.persona.id_persona),
-          name: `${data.persona.nombre} ${data.persona.apellido}`,
-          email: data.persona.email,
-          role: determineRole(data.persona),
-          active: data.persona.estado,
-          celular: data.persona.celular,
-          solicitud_user_especial: data.persona.solicitud_user_especial,
-          tipo_cuenta: data.persona.tipo_cuenta
-        };
-
-        setUsers((s) => s.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
-      }
+      // remove locally
+      setUsers((s) => s.filter(x => x.id !== u.id));
     } catch (err) {
-      console.error('Error al activar/desactivar profesor:', err);
-      alert('Error al cambiar el estado del profesor. Intenta de nuevo.');
+      console.error('Error al eliminar usuario:', err);
+      alert('Error al eliminar el usuario. Intenta de nuevo.');
     }
   }
 
@@ -217,7 +310,7 @@ export default function UsersAdminPage() {
     let res = users.slice();
     if (search.trim()) {
       const q = search.toLowerCase();
-      res = res.filter((u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+      res = res.filter((u) => (u.name?.toLowerCase().includes(q) || false) || (u.email?.toLowerCase().includes(q) || false));
     }
     if (roleFilter !== "TODOS") res = res.filter((u) => u.role === roleFilter);
     if (activeFilter === "ACTIVOS") res = res.filter((u) => u.active);
@@ -233,6 +326,65 @@ export default function UsersAdminPage() {
     }
     return res;
   }, [users, search, roleFilter, activeFilter, sortKey, sortDir]);
+
+  // Table columns for the reusable Table component
+  const columns: TableColumn<UserRow>[] = [
+    { key: 'index', label: '#', width: '80px', render: (_u, idx) => (<span className="text-sm text-slate-500">{idx + 1}</span>) },
+    {
+      key: 'name',
+      label: 'Usuario',
+      render: (u) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-slate-900">{u.name}</span>
+          <span className="text-xs text-slate-500">{u.email}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'role',
+      label: 'Rol',
+      render: (u) => (
+        <span className="text-sm text-slate-700">
+          {u.role === 'ALUMNO' && 'Alumno'}
+          {u.role === 'FEMME' && 'Femme'}
+          {u.role === 'PROFESOR' && 'Profesor'}
+          {u.role === 'DIRECTOR' && 'Director'}
+        </span>
+      ),
+    },
+    {
+      key: 'active',
+      label: 'Acceso',
+      render: (u) => (
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={(e) => { e.stopPropagation(); toggleActiveLocal(u.id); }}
+          role="button"
+          aria-label={u.active ? 'Deshabilitar cuenta' : 'Habilitar cuenta'}
+        >
+          <div className="pointer-events-none">
+            <Switch checked={u.active} onCheckedChange={() => { /* handled by container click */ }} />
+          </div>
+          <span className="text-xs text-slate-600">{u.active ? 'Habilitada' : 'Deshabilitada'}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      width: '140px',
+      render: (u) => (
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(u)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-600 hover:text-rose-700 hover:bg-rose-50" onClick={() => handleDeleteUser(u)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ]
 
   return (
     <div className="min-h-[80vh] bg-neutral-50 py-8">
@@ -267,57 +419,17 @@ export default function UsersAdminPage() {
         {error && <div className="py-16 text-center text-red-600">No se pudo cargar. Intenta de nuevo.</div>}
 
         {!loading && !error && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b bg-neutral-50 text-neutral-600">
-                  {([
-                    ["id", "#"],
-                    ["name", "Nombre"],
-                    ["email", "Email"],
-                    ["role", "Rol"],
-                    ["active", "Estado"],
-                  ] as [keyof UserRow, string][]).map(([k, label]) => (
-                    <th key={String(k)} className="cursor-pointer px-3 py-2" onClick={() => toggleSort(k)}>
-                      <div className="flex items-center gap-1">
-                        <span>{label}</span>
-                      </div>
-                    </th>
-                  ))}
-                  <th className="px-3 py-2">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibles.map((u) => (
-                  <tr key={u.id} className="border-b last:border-0">
-                    <td className="px-3 py-2">{u.id}</td>
-                    <td className="px-3 py-2 font-medium">{u.name}</td>
-                    <td className="px-3 py-2">{u.email}</td>
-                    <td className="px-3 py-2">{u.role}</td>
-                    <td className="px-3 py-2">
-                      <span className={classNames("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", u.active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")}>
-                        {u.active ? "Activo" : "Inactivo"}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex flex-wrap gap-2">
-                        <button onClick={() => openEdit(u)} className="underline-offset-2 hover:underline text-pink-600">Ver / Editar</button>
-                        {u.role === "PROFESOR" && (
-                          <button onClick={() => toggleActiveLocal(u.id)} className="rounded-lg border px-2.5 py-1 text-xs">
-                            {u.active ? "Desactivar cuenta" : "Activar cuenta"}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {visibles.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-3 py-10 text-center text-sm text-neutral-500">Sin resultados.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div>
+            <Table
+              data={visibles}
+              columns={columns}
+              loading={loading}
+              // wire sorting to existing state/handler
+              sorting={{ key: sortKey, direction: sortDir, onSort: (k) => toggleSort(k as keyof UserRow) }}
+              emptyState={{ title: 'Sin resultados.', description: 'No se encontraron usuarios con los filtros seleccionados.' }}
+              onRowClick={(u) => openEdit(u)}
+              rowClassName={(u) => u.active ? '' : 'opacity-60'}
+            />
           </div>
         )}
       </div>
@@ -330,12 +442,46 @@ export default function UsersAdminPage() {
               {!edit.__isNew && <p className="text-xs text-neutral-500">ID: {edit.id} · {edit.email}</p>}
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className={`grid gap-4 ${edit.__isNew ? 'grid-cols-2' : 'grid-cols-1'}`}>
               <div>
                 <label className="text-sm font-medium">Nombre</label>
-                <input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} className={classNames("mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-4", !edit.name ? "border-red-400 focus:ring-red-100" : "border-neutral-300 focus:ring-neutral-200")} placeholder="Nombre completo" />
+                <input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} className={classNames("mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-4", !edit.name ? "border-red-400 focus:ring-red-100" : "border-neutral-300 focus:ring-neutral-200")} placeholder="Nombre" />
                 {!edit.name && <p className="mt-1 text-xs text-red-600">Requerido</p>}
               </div>
+
+              {edit.__isNew && (
+                <>
+                  <div>
+                    <label className="text-sm font-medium">Apellido Paterno</label>
+                    <input value={edit.apellido_paterno || ''} onChange={(e) => setEdit({ ...edit, apellido_paterno: e.target.value })} className="mt-1 w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none focus:ring-4 focus:ring-neutral-200" placeholder="Apellido paterno" />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Apellido Materno</label>
+                    <input value={edit.apellido_materno || ''} onChange={(e) => setEdit({ ...edit, apellido_materno: e.target.value })} className="mt-1 w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none focus:ring-4 focus:ring-neutral-200" placeholder="Apellido materno" />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Contraseña</label>
+                    <input type="password" value={edit.password || ''} onChange={(e) => setEdit({ ...edit, password: e.target.value })} className={classNames("mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-4", !edit.password ? "border-red-400 focus:ring-red-100" : "border-neutral-300 focus:ring-neutral-200")} placeholder="Contraseña" />
+                    {!edit.password && <p className="mt-1 text-xs text-red-600">Requerido</p>}
+                  </div>
+                </>
+              )}
+
+              {!edit.__isNew && (
+                <>
+                  <div>
+                    <label className="text-sm font-medium">Apellido Paterno</label>
+                    <input value={edit.apellido_paterno || ''} onChange={(e) => setEdit({ ...edit, apellido_paterno: e.target.value })} className="mt-1 w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none focus:ring-4 focus:ring-neutral-200" placeholder="Apellido paterno" />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Apellido Materno</label>
+                    <input value={edit.apellido_materno || ''} onChange={(e) => setEdit({ ...edit, apellido_materno: e.target.value })} className="mt-1 w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none focus:ring-4 focus:ring-neutral-200" placeholder="Apellido materno" />
+                  </div>
+                </>
+              )}
 
               <div>
                 <label className="text-sm font-medium">Email</label>
@@ -348,20 +494,23 @@ export default function UsersAdminPage() {
                 <input value={edit.celular || ''} onChange={(e) => setEdit({ ...edit, celular: e.target.value })} className="mt-1 w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none focus:ring-4 focus:ring-neutral-200" placeholder="123456789" />
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Rol</label>
-                <select value={edit.role} onChange={(e) => setEdit({ ...edit, role: e.target.value as Role })} className="mt-1 w-full rounded-xl border bg-white px-3 py-2 outline-none focus:ring-4">
-                  <option value="ALUMNO">Alumno</option>
-                  <option value="FEMME">Femme</option>
-                  <option value="PROFESOR">Profesor</option>
-                  <option value="DIRECTOR">Director</option>
-                </select>
-              </div>
+              {edit.__isNew && (
+                <div>
+                  <label className="text-sm font-medium">Rol</label>
+                  <select value={edit.role} onChange={(e) => setEdit({ ...edit, role: e.target.value as Role })} className="mt-1 w-full rounded-xl border bg-white px-3 py-2 outline-none focus:ring-4">
+                    <option value="ALUMNO">Alumno</option>
+                    <option value="FEMME">Femme</option>
+                    <option value="PROFESOR">Profesor</option>
+                    <option value="DIRECTOR">Director</option>
+                  </select>
+                </div>
+              )}
 
-              <label className="inline-flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={edit.active} onChange={(e) => setEdit({ ...edit, active: e.target.checked })} />
-                Activo
-              </label>
+              {!edit.__isNew && (
+                <div className="text-sm text-neutral-600">
+                  <strong>Rol:</strong> {edit.role === 'ALUMNO' && 'Alumno'}{edit.role === 'FEMME' && 'Femme'}{edit.role === 'PROFESOR' && 'Profesor'}{edit.role === 'DIRECTOR' && 'Director'}
+                </div>
+              )}
             </div>
             {/** 
             ml-auto flex items-center gap-2*/}
@@ -377,5 +526,3 @@ export default function UsersAdminPage() {
     </div>
   );
 }
-
- 

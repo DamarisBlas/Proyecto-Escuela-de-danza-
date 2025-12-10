@@ -30,32 +30,98 @@ export default function RafflesPage() {
 
 
 import React, { useMemo, useState, useEffect } from "react";
-import { Gift, Eye, Mail, Trash2, Filter, Trophy, Shuffle, ChevronDown, ChevronUp } from "lucide-react";
+import { Gift, Mail, Trash2, Filter, Trophy, Shuffle, ChevronDown, ChevronUp } from "lucide-react";
+import { env } from "@/config/env";
 
 
 export default function RafflesPage() {
   // Ciclos
   const cycles = ["Todos", "Ciclo 1-2024", "Ciclo 2-2024", "Ciclo 1-2025"];
-  const [cycleFilter, setCycleFilter] = useState<string>(cycles[3]);
+  const [cycleFilter, setCycleFilter] = useState<string>("Todos");
 
-  // Ganadoras históricas (mock)
-  type Winner = { id: string; name: string; userType: string; prize: string; raffleTitle: string; cycle: string };
-  const [winners, setWinners] = useState<Winner[]>([
-    { id: "w1", name: "Ana", userType: "Cliente", prize: "70% (Tarjeta C/Full)", raffleTitle: "SORTEO FEMME — 27 Ene", cycle: "Ciclo 1-2025" },
-    { id: "w2", name: "María", userType: "Cliente", prize: "70% (Tarjeta C/Full)", raffleTitle: "SORTEO FEMME — 27 Ene", cycle: "Ciclo 1-2025" },
-  ]);
+  // Ganadoras históricas
+  type Winner = { id: string; name: string; userType: string; prize: string; raffleTitle: string; cycle: string; phone?: string };
+  const [winners, setWinners] = useState<Winner[]>([]);
 
-  // Sorteos (mock)
+  const fetchAllWinners = async () => {
+    try {
+      const response = await fetch(`${env.API_URL}/sorteos/ganadores-detalle`);
+      if (!response.ok) {
+        console.error('Error fetching winners:', response.status);
+        return;
+      }
+      const data = await response.json();
+      const allWinners: Winner[] = [];
+      
+      data.sorteos.forEach((sorteoItem: any) => {
+        const sorteoInfo = sorteoItem.sorteo;
+        sorteoItem.ganadores.forEach((ganador: any, idx: number) => {
+          allWinners.push({
+            id: `w-${sorteoInfo.id_sorteo}-${ganador.id_ganador}`,
+            name: ganador.nombre_completo,
+            userType: ganador.tipo_cuenta === 'alumno' ? 'Alumno' : ganador.tipo_cuenta === 'profesor' ? 'Profesor' : 'Cliente',
+            prize: `${ganador.premio.descuento}%`,
+            raffleTitle: sorteoInfo.promocion,
+            cycle: 'N/A', // No hay info de ciclo en este endpoint
+            phone: ganador.celular
+          });
+        });
+      });
+      
+      setWinners(allWinners);
+      console.log('Winners loaded:', allWinners.length);
+    } catch (error) {
+      console.error('Error fetching winners:', error);
+    }
+  };
+
+  // Fetch winners on mount
+  useEffect(() => {
+    fetchAllWinners();
+  }, []);
+
+  // Sorteos
   type RaffleStatus = "activo" | "inactivo" | "finalizado";
   type Raffle = { id: string; cycle: string; title: string; deadline: string; description: string; enrolled: number; status: RaffleStatus };
-  const [raffles] = useState<Raffle[]>([
-    { id: "r1", cycle: "Ciclo 1-2025", title: "Sorteo FEMME — 27/01", deadline: "2025-01-27T20:00:00", description: "Promo válida para Tarjeta C y FULL PASS.", enrolled: 34, status: "activo" },
-    { id: "r2", cycle: "Ciclo 1-2025", title: "Sorteo FEMME — 15/03", deadline: "2025-03-15T18:00:00", description: "Descuentos escalonados.", enrolled: 52, status: "finalizado" },
-    { id: "r3", cycle: "Ciclo 2-2024", title: "Sorteo FEMME — 10/11", deadline: "2024-11-10T19:30:00", description: "Edición pasada.", enrolled: 20, status: "inactivo" },
-  ]);
+  const [raffles, setRaffles] = useState<Raffle[]>([]);
+
+  // Fetch raffles from API
+  useEffect(() => {
+    const fetchRaffles = async () => {
+      try {
+        const response = await fetch(`${env.API_URL}/promociones/sorteos`);
+        if (!response.ok) throw new Error('Error fetching raffles');
+        const data = await response.json();
+        const mappedRaffles: Raffle[] = data.map((item: any) => ({
+          id: String(item.id_promocion),
+          cycle: item.ciclo.nombre_ciclo,
+          title: item.nombre_promocion,
+          deadline: item.fecha_fin,
+          description: item.descricpcion,
+          enrolled: item.cantidad_beneficiarios_inscritos,
+          status: item.activo ? "activo" : "inactivo" as RaffleStatus
+        }));
+        setRaffles(mappedRaffles);
+      } catch (error) {
+        console.error('Error fetching raffles:', error);
+      }
+    };
+    fetchRaffles();
+  }, []);
 
   const filteredWinners = useMemo(() => winners.filter(w => cycleFilter === "Todos" || w.cycle === cycleFilter), [winners, cycleFilter]);
   const filteredRaffles = useMemo(() => raffles.filter(r => cycleFilter === "Todos" || r.cycle === cycleFilter), [raffles, cycleFilter]);
+
+  function sendWhatsAppMessage(winner: Winner) {
+    if (!winner.phone) {
+      alert('No hay número de teléfono para esta ganadora.');
+      return;
+    }
+    const message = `¡Felicidades ${winner.name}! 🎉\n\nHas sido ganadora del sorteo "${winner.raffleTitle}" con un descuento del ${winner.prize}.\n\n¡Gracias por participar!`;
+    const phone = winner.phone.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  }
 
   // Detalle fuera de la tabla
   const [openId, setOpenId] = useState<string | null>(null);
@@ -114,8 +180,8 @@ export default function RafflesPage() {
                     <td className="px-3 py-2">{w.raffleTitle}</td>
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <button className="rounded-lg border border-femme-coral px-2 py-1 text-xs text-femme-coral hover:bg-femme-coral/10" title="Enviar notificación"><Mail className="size-4" /></button>
-                        <button className="rounded-lg border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50" title="Eliminar"><Trash2 className="size-4" /></button>
+                        <button onClick={() => sendWhatsAppMessage(w)} className="rounded-lg border border-femme-coral px-2 py-1 text-xs text-femme-coral hover:bg-femme-coral/10" title="Enviar felicitación por WhatsApp"><Mail className="size-4" /></button>
+                        {/* <button className="rounded-lg border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50" title="Eliminar"><Trash2 className="size-4" /></button> */}
                       </div>
                     </td>
                   </tr>
@@ -153,26 +219,17 @@ export default function RafflesPage() {
                   <td className="px-3 py-2">{r.enrolled}</td>
                   <td className="px-3 py-2">{statusBadge(r.status)}</td>
                   <td className="px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <button
-                        className={`${r.status === "activo" ? "bg-gradient-to-r from-femme-magenta to-femme-rose hover:shadow" : "bg-graphite/30 cursor-not-allowed"} rounded-lg px-3 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-femme-magenta focus:ring-offset-2`}
-                        disabled={r.status !== "activo"}
-                        onClick={() => setOpenId(prev => prev === r.id ? null : r.id)}
-                      >
-                        {openId === r.id ? (
-                          <span className="inline-flex items-center gap-1">Cerrar <ChevronUp className="size-4"/></span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1">Sortear <ChevronDown className="size-4"/></span>
-                        )}
-                      </button>
-                      <button
-                        className="rounded-lg border border-femme-coral px-3 py-1 text-xs font-medium text-femme-coral hover:bg-femme-coral/10 focus:outline-none focus:ring-2 focus:ring-femme-coral/60"
-                        onClick={() => setOpenId(prev => prev === r.id ? null : r.id)}
-                        title="Detalle"
-                      >
-                        <Eye className="mr-1 inline size-4" />Ver
-                      </button>
-                    </div>
+                    <button
+                      className={`${r.status === "activo" ? "bg-gradient-to-r from-femme-magenta to-femme-rose hover:shadow" : "bg-graphite/30 cursor-not-allowed"} rounded-lg px-3 py-1 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-femme-magenta focus:ring-offset-2`}
+                      disabled={r.status !== "activo"}
+                      onClick={() => setOpenId(prev => prev === r.id ? null : r.id)}
+                    >
+                      {openId === r.id ? (
+                        <span className="inline-flex items-center gap-1">Cerrar <ChevronUp className="size-4"/></span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1">Sortear <ChevronDown className="size-4"/></span>
+                      )}
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -184,7 +241,7 @@ export default function RafflesPage() {
       {/* Detalle debajo de la tabla */}
       {selected && (
         <section className="rounded-2xl border bg-white p-3 shadow-sm">
-          <RaffleInlineDetail raffle={selected} onClose={() => setOpenId(null)} onAddWinners={(ww)=>setWinners(prev=>[...ww, ...prev])} />
+          <RaffleInlineDetail raffle={selected} onClose={() => setOpenId(null)} onRefreshWinners={fetchAllWinners} />
         </section>
       )}
     </div>
@@ -193,9 +250,43 @@ export default function RafflesPage() {
 
 // ────────────────────────────────────────────────────────────────────────────────
 // Detalle simple inline (debajo de la tabla)
-function RaffleInlineDetail({ raffle, onClose, onAddWinners }: { raffle: { id: string; cycle: string; title: string; deadline: string; description: string; enrolled: number }; onClose: ()=>void; onAddWinners: (w: { id: string; name: string; userType: string; prize: string; raffleTitle: string; cycle: string }[]) => void; }) {
+function RaffleInlineDetail({ raffle, onClose, onRefreshWinners }: { raffle: { id: string; cycle: string; title: string; deadline: string; description: string; enrolled: number }; onClose: ()=>void; onRefreshWinners: () => void; }) {
   type Participant = { id: string; name: string; userType: string; enrolledAt: string; include: boolean };
-  const [participants, setParticipants] = useState<Participant[]>(() => sampleParticipants(raffle.enrolled));
+  const [participants, setParticipants] = useState<Participant[]>([]);
+
+  // Fetch participants from API
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      try {
+        const response = await fetch(`${env.API_URL}/promociones/personasdeunsorteo/${raffle.id}`);
+        if (!response.ok) throw new Error('Error fetching participants');
+        const data = await response.json();
+        // Unique by id_persona, prefer PAGADO if duplicate
+        const uniqueMap = new Map();
+        data.personas.forEach((p: any) => {
+          if (!uniqueMap.has(p.id_persona)) {
+            uniqueMap.set(p.id_persona, p);
+          } else {
+            if (p.estado_pago === 'PAGADO') {
+              uniqueMap.set(p.id_persona, p);
+            }
+          }
+        });
+        const uniquePersonas = Array.from(uniqueMap.values());
+        const mappedParticipants: Participant[] = uniquePersonas.map((p: any) => ({
+          id: String(p.id_persona),
+          name: `${p.nombre} ${p.apellido_paterno || ''} ${p.apellido_materno || ''}`.trim(),
+          userType: p.tipo_cuenta === 'alumno' ? 'Alumno' : p.tipo_cuenta === 'profesor' ? 'Profesor' : 'Cliente',
+          enrolledAt: p.fecha_inscripcion,
+          include: p.estado_inscripcion === 'ACTIVO'
+        }));
+        setParticipants(mappedParticipants);
+      } catch (error) {
+        console.error('Error fetching participants:', error);
+      }
+    };
+    fetchParticipants();
+  }, [raffle.id]);
 
   // Orden por fecha/hora (asc)
   const ordered = useMemo(() => [...participants].sort((a,b)=>new Date(a.enrolledAt).getTime()-new Date(b.enrolledAt).getTime()), [participants]);
@@ -203,30 +294,35 @@ function RaffleInlineDetail({ raffle, onClose, onAddWinners }: { raffle: { id: s
   const filtered = useMemo(() => typeFilter === "Todos" ? ordered : ordered.filter(p => p.userType === typeFilter), [ordered, typeFilter]);
 
   // Ganadoras y premios
-  const [winnersCount, setWinnersCount] = useState<number>(3);
-  const [prizes, setPrizes] = useState<number[]>([70, 50, 40]);
+  type Prize = { id_premio: number; descuento: number; estado: boolean };
+  const [prizes, setPrizes] = useState<Prize[]>([]);
+  const [winnersCount, setWinnersCount] = useState<number>(0);
 
-  // Autogenerar premios al cambiar la cantidad
-  useEffect(()=>{
-    setPrizes(prev => {
-      const next = [...prev];
-      if (winnersCount > next.length) {
-        while (next.length < winnersCount) next.push(70);
-      } else if (winnersCount < next.length) {
-        next.length = winnersCount;
+  // Fetch prizes from API
+  useEffect(() => {
+    const fetchPrizes = async () => {
+      try {
+        const response = await fetch(`${env.API_URL}/promociones/${raffle.id}/premios`);
+        if (!response.ok) throw new Error('Error fetching prizes');
+        const data = await response.json();
+        const activePrizes = data.filter((p: any) => p.estado);
+        setPrizes(activePrizes);
+        setWinnersCount(activePrizes.length);
+      } catch (error) {
+        console.error('Error fetching prizes:', error);
       }
-      return next;
-    });
-  }, [winnersCount]);
+    };
+    fetchPrizes();
+  }, [raffle.id]);
 
-  function setPrizeAt(i: number, val: number) { setPrizes(prev => prev.map((p, idx) => idx === i ? val : p)); }
+  function setPrizeAt(i: number, val: number) { setPrizes(prev => prev.map((p, idx) => idx === i ? {...p, descuento: val} : p)); }
   function toggleInclude(id: string) { setParticipants(prev => prev.map(p => p.id===id?{...p, include: !p.include}:p)); }
   function selectAll(val: boolean) { setParticipants(prev => prev.map(p => ({...p, include: val}))); }
 
   // Seleccionadas actuales
   const selectedNow = useMemo(() => filtered.filter(p=>p.include), [filtered]);
 
-  type Picked = { participant: Participant; discount: number };
+  type Picked = { participant: Participant; discount: number; prizeId?: number };
   const [picked, setPicked] = useState<Picked[]>([]);
   const [announce, setAnnounce] = useState<string>("");
 
@@ -243,25 +339,68 @@ function RaffleInlineDetail({ raffle, onClose, onAddWinners }: { raffle: { id: s
     for (let i=0; i<qty; i++) {
       const idx = Math.floor(Math.random() * candidates.length);
       const chosen = candidates.splice(idx,1)[0];
-      res.push({ participant: chosen, discount: prizes[i] ?? prizes[prizes.length-1] ?? 0 });
+      const discount = prizes[i]?.descuento ?? 0;
+      res.push({ participant: chosen, discount, prizeId: prizes[i]?.id_premio });
     }
     setPicked(res);
     const msg = res.map((x, i) => `${i+1}. ${x.participant.name} (${x.discount}%)`).join(" · ");
     setAnnounce(`Ganadoras: ${msg}`);
   }
 
-  function confirm() {
+  async function confirm() {
     if (picked.length === 0) return;
-    const mapped = picked.map(({participant, discount}) => ({
-      id: `w-${participant.id}-${Date.now()}`,
-      name: participant.name,
-      userType: participant.userType,
-      prize: `${discount}% (Tarjeta C/Full)`,
-      raffleTitle: raffle.title,
-      cycle: raffle.cycle,
-    }));
-    onAddWinners(mapped);
-    onClose();
+    try {
+      console.log('Creating sorteo for promocion:', raffle.id);
+      // 1. Create sorteo
+      const sorteoPayload = {
+        Promocion_id_promocion: parseInt(raffle.id)
+      };
+      console.log('Sorteo payload:', sorteoPayload);
+      
+      const sorteoResponse = await fetch(`${env.API_URL}/sorteos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sorteoPayload)
+      });
+      
+      if (!sorteoResponse.ok) {
+        const errorText = await sorteoResponse.text();
+        console.error('Sorteo creation failed:', sorteoResponse.status, errorText);
+        throw new Error(`Error creating sorteo: ${sorteoResponse.status}`);
+      }
+      
+      const sorteoData = await sorteoResponse.json();
+      console.log('Sorteo created:', sorteoData);
+      const idSorteo = sorteoData.sorteo.id_sorteo;
+
+      // 2. Create winners
+      for (const winner of picked) {
+        const ganadorPayload = {
+          Persona_id_persona: parseInt(winner.participant.id),
+          Sorteo_id_sorteo: idSorteo,
+          Premios_id_premio: winner.prizeId
+        };
+        console.log('Creating ganador:', ganadorPayload);
+        
+        const ganadorResponse = await fetch(`${env.API_URL}/ganadores`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(ganadorPayload)
+        });
+        
+        if (!ganadorResponse.ok) {
+          const errorText = await ganadorResponse.text();
+          console.error('Ganador creation failed:', ganadorResponse.status, errorText);
+        }
+      }
+
+      // 3. Refresh all winners table
+      onRefreshWinners();
+      onClose();
+    } catch (error) {
+      console.error('Error confirming raffle:', error);
+      alert('Error al confirmar el sorteo. Intenta de nuevo.');
+    }
   }
 
   // Selector de cantidad (como botón)
@@ -318,7 +457,7 @@ function RaffleInlineDetail({ raffle, onClose, onAddWinners }: { raffle: { id: s
               <label key={i} className="flex items-center justify-between rounded-lg border px-2 py-2 text-sm">
                 <span className="text-ink">Ganadora {i+1}</span>
                 <span className="flex items-center gap-2">
-                  <input type="number" min={0} max={100} className="w-20 rounded-md border px-2 py-1 text-right text-sm focus:outline-none focus:ring-2 focus:ring-femme-magenta" value={p} onChange={(e)=>setPrizeAt(i, Number(e.target.value)||0)} />
+                  <input type="number" min={0} max={100} className="w-20 rounded-md border px-2 py-1 text-right text-sm focus:outline-none focus:ring-2 focus:ring-femme-magenta" value={p.descuento} onChange={(e)=>setPrizeAt(i, Number(e.target.value)||0)} />
                   <span className="text-ink">%</span>
                 </span>
               </label>
@@ -466,17 +605,4 @@ function statusBadge(status: "activo" | "inactivo" | "finalizado") {
   return <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs ${map[status]}`}>{status}</span>;
 }
 
-function sampleParticipants(n: number): { id: string; name: string; userType: string; enrolledAt: string; include: boolean }[] {
-  const names = [
-    "Ana", "María", "Sofía", "Lucía", "Camila", "Valentina", "Fernanda", "Carla", "Paula", "Daniela",
-    "Laura", "Julieta", "Micaela", "Adriana", "Rocío", "Gabriela", "Natalia", "Andrea", "Bianca", "Jimena",
-    "Karla", "Noelia", "Patricia", "Yesenia", "Zoe", "Fiorella", "Ivanna", "Alejandra", "Mónica", "Diana",
-  ];
-  const types = ["Cliente", "Femme", "Alumno"];
-  return Array.from({ length: Math.min(n, names.length) }).map((_, i) => {
-    const day = 20 + Math.floor(i / 6);
-    const hr = 16 + (i % 6);
-    const date = new Date(`2025-01-${String(day).padStart(2, "0")}T${String(hr).padStart(2, "0")}:${String((i * 7) % 60).padStart(2, "0")}:00`);
-    return { id: `p${i + 1}`, name: names[i % names.length], userType: types[i % types.length], enrolledAt: date.toISOString(), include: true };
-  });
-}
+
