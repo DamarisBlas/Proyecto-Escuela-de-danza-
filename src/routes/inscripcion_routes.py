@@ -82,7 +82,10 @@ def create_inscripcion():
         return jsonify(result), status_code
 
     except Exception as e:
-        return jsonify({"error": f"Error en la solicitud: {str(e)}"}), 400
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Error completo al crear inscripción: {error_trace}")
+        return jsonify({"error": f"Error en la solicitud: {str(e)}", "trace": error_trace}), 500
 
 @inscripcion_bp.route('/<int:inscripcion_id>', methods=['PUT'])
 def update_inscripcion(inscripcion_id):

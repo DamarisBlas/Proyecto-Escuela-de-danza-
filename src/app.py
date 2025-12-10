@@ -14,7 +14,8 @@ def create_app():
     # Load configuration from the Config class in src/config.py
     app.config.from_object(Config)
     app.url_map.strict_slashes = False
-
+    
+    
     CORS(app, 
          origins=[
              "http://localhost:5173", 
@@ -29,8 +30,9 @@ def create_app():
          allow_headers=["Content-Type", "Authorization"],
          supports_credentials=True)
   
-  
- 
+
+
+
 
 
 
@@ -38,12 +40,11 @@ def create_app():
     migrate.init_app(app, db)
     
     # Import models so Flask-Migrate can detect them
-    from . import models
-    
+    from . import models 
      # CREAR TABLAS EN LA BD REMOTA (bloque temporal)
     with app.app_context():
         db.create_all()
-    
+
     # Register routes
     from .routes import register_routes
     register_routes(app)

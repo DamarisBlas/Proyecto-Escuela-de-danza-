@@ -22,6 +22,9 @@ from src.routes.notificacion_persona_routes import notificacion_persona_bp
 from src.routes.permiso_routes import permiso_bp
 from src.routes.dashboard_routes import dashboard_bp
 from src.routes.ml_routes import ml_bp
+from src.routes.stripe_routes import stripe_bp
+from src.routes.sorteo_routes import sorteo_bp
+from src.routes.ganador_routes import ganador_bp
 
 def register_routes(app):
     app.register_blueprint(user_bp, url_prefix='/users')
@@ -48,3 +51,6 @@ def register_routes(app):
     app.register_blueprint(permiso_bp, url_prefix='/permisos')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
     app.register_blueprint(ml_bp, url_prefix='/ml')
+    app.register_blueprint(stripe_bp, url_prefix='/stripe')
+    app.register_blueprint(sorteo_bp)
+    app.register_blueprint(ganador_bp)

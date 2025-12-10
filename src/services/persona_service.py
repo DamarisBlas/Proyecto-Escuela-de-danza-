@@ -14,7 +14,7 @@ class PersonaService:
     @staticmethod
     def get_all_personas():
         """
-        Obtiene todas las personas con campos específicos
+        Obtiene todas las personas con campos específicos e información del estado según tipo_cuenta
         """
         try:
             personas = PersonaRepository.get_all()
@@ -34,6 +34,54 @@ class PersonaService:
                     'tipo_cuenta': persona.tipo_cuenta,
                     'temporal': persona.temporal
                 }
+
+                # Agregar información específica del tipo_cuenta
+                tipo_cuenta = persona.tipo_cuenta
+                estado_rol = None
+
+                if tipo_cuenta == 'profesor':
+                    profesor = db.session.query(Profesor).filter_by(Persona_id_persona=persona.id_persona).first()
+                    if profesor:
+                        estado_rol = profesor.estado
+                        persona_dict['tipo_cuenta_info'] = {
+                            'tipo_cuenta': 'profesor',
+                            'estado': estado_rol
+                        }
+
+                elif tipo_cuenta == 'alumno':
+                    alumno = db.session.query(Alumno).filter_by(Persona_id_persona=persona.id_persona).first()
+                    if alumno:
+                        estado_rol = alumno.estado
+                        persona_dict['tipo_cuenta_info'] = {
+                            'tipo_cuenta': 'alumno',
+                            'estado': estado_rol
+                        }
+
+                elif tipo_cuenta == 'alumno_femme':
+                    alumno_femme = db.session.query(AlumnoFemme).filter_by(Persona_id_persona=persona.id_persona).first()
+                    if alumno_femme:
+                        estado_rol = alumno_femme.estado
+                        persona_dict['tipo_cuenta_info'] = {
+                            'tipo_cuenta': 'alumno_femme',
+                            'estado': estado_rol
+                        }
+
+                elif tipo_cuenta == 'director':
+                    director = db.session.query(Director).filter_by(Persona_id_persona=persona.id_persona).first()
+                    if director:
+                        estado_rol = director.estado
+                        persona_dict['tipo_cuenta_info'] = {
+                            'tipo_cuenta': 'director',
+                            'estado': estado_rol
+                        }
+
+                # Si no tiene tipo_cuenta definido o no se encontró en la tabla correspondiente
+                if not persona_dict.get('tipo_cuenta_info'):
+                    persona_dict['tipo_cuenta_info'] = {
+                        'tipo_cuenta': tipo_cuenta or 'sin_definir',
+                        'estado': None
+                    }
+
                 personas_filtradas.append(persona_dict)
 
             return personas_filtradas, 200
@@ -281,3 +329,115 @@ class PersonaService:
 
         except Exception as e:
             return {"error": f"Error al obtener persona detallada: {str(e)}"}, 500
+
+    @staticmethod
+    def toggle_account_status(persona_id, habilitar):
+        """
+        Habilita o deshabilita una cuenta según el tipo_cuenta.
+        Busca en la tabla correspondiente (Profesor, Alumno, AlumnoFemme, Director)
+        y cambia el campo 'estado'.
+        
+        Args:
+            persona_id (int): ID de la persona
+            habilitar (bool): True para habilitar, False para deshabilitar
+        
+        Returns:
+            dict: Resultado de la operación
+            int: Código de estado HTTP
+        """
+        try:
+            # Buscar persona por ID
+            persona = PersonaRepository.get_by_id(persona_id)
+            if not persona:
+                return {"error": "Persona no encontrada"}, 404
+
+            tipo_cuenta = persona.tipo_cuenta
+            estado_actualizado = False
+            tabla_actualizada = None
+            
+            # Si tiene tipo_cuenta definido, buscar en la tabla correspondiente
+            if tipo_cuenta == 'profesor':
+                profesor = db.session.query(Profesor).filter_by(Persona_id_persona=persona_id).first()
+                if profesor:
+                    profesor.estado = habilitar
+                    tabla_actualizada = 'Profesor'
+                    estado_actualizado = True
+            
+            elif tipo_cuenta == 'alumno':
+                alumno = db.session.query(Alumno).filter_by(Persona_id_persona=persona_id).first()
+                if alumno:
+                    alumno.estado = habilitar
+                    tabla_actualizada = 'Alumno'
+                    estado_actualizado = True
+            
+            elif tipo_cuenta == 'alumno_femme':
+                alumno_femme = db.session.query(AlumnoFemme).filter_by(Persona_id_persona=persona_id).first()
+                if alumno_femme:
+                    alumno_femme.estado = habilitar
+                    tabla_actualizada = 'Alumno_Femme'
+                    estado_actualizado = True
+            
+            elif tipo_cuenta == 'director':
+                director = db.session.query(Director).filter_by(Persona_id_persona=persona_id).first()
+                if director:
+                    director.estado = habilitar
+                    tabla_actualizada = 'Director'
+                    estado_actualizado = True
+            
+            # Si no tiene tipo_cuenta o no se encontró en la tabla correspondiente,
+            # buscar en todas las tablas
+            if not estado_actualizado:
+                # Buscar en Profesor
+                profesor = db.session.query(Profesor).filter_by(Persona_id_persona=persona_id).first()
+                if profesor:
+                    profesor.estado = habilitar
+                    tabla_actualizada = 'Profesor'
+                    estado_actualizado = True
+                
+                # Buscar en Alumno
+                if not estado_actualizado:
+                    alumno = db.session.query(Alumno).filter_by(Persona_id_persona=persona_id).first()
+                    if alumno:
+                        alumno.estado = habilitar
+                        tabla_actualizada = 'Alumno'
+                        estado_actualizado = True
+                
+                # Buscar en AlumnoFemme
+                if not estado_actualizado:
+                    alumno_femme = db.session.query(AlumnoFemme).filter_by(Persona_id_persona=persona_id).first()
+                    if alumno_femme:
+                        alumno_femme.estado = habilitar
+                        tabla_actualizada = 'Alumno_Femme'
+                        estado_actualizado = True
+                
+                # Buscar en Director
+                if not estado_actualizado:
+                    director = db.session.query(Director).filter_by(Persona_id_persona=persona_id).first()
+                    if director:
+                        director.estado = habilitar
+                        tabla_actualizada = 'Director'
+                        estado_actualizado = True
+            
+            # Si no se encontró en ninguna tabla
+            if not estado_actualizado:
+                return {
+                    "error": "No se encontró registro de rol para esta persona",
+                    "persona_id": persona_id,
+                    "tipo_cuenta": tipo_cuenta
+                }, 404
+            
+            # Guardar cambios
+            db.session.commit()
+            
+            accion = "habilitada" if habilitar else "deshabilitada"
+            return {
+                "message": f"Cuenta {accion} exitosamente",
+                "persona_id": persona_id,
+                "tipo_cuenta": tipo_cuenta or tabla_actualizada,
+                "tabla_actualizada": tabla_actualizada,
+                "estado": habilitar
+            }, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error": f"Error al cambiar estado de cuenta: {str(e)}"}, 500

@@ -11,6 +11,9 @@ class Pago(db.Model):
 
     numero_cuota = Column(Integer, nullable=False)
     monto = Column(Numeric(10, 2), nullable=False)
+    
+    # Stripe integration
+    payment_intent_id = Column(String(255), nullable=True, unique=True)  # ID del pago en Stripe
 
     fecha_pago = Column(DateTime, nullable=True)
     fecha_vencimiento = Column(Date, nullable=False)
@@ -27,6 +30,7 @@ class Pago(db.Model):
             'Metodo_pago_id_metodo_pago': self.Metodo_pago_id_metodo_pago,
             'numero_cuota': self.numero_cuota,
             'monto': float(self.monto) if self.monto is not None else None,
+            'payment_intent_id': self.payment_intent_id,
             'fecha_pago': self.fecha_pago.isoformat() if self.fecha_pago else None,
             'fecha_vencimiento': self.fecha_vencimiento.isoformat() if self.fecha_vencimiento else None,
             'fecha_confirmacion_director': self.fecha_confirmacion_director.isoformat() if self.fecha_confirmacion_director else None,

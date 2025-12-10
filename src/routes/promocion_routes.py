@@ -57,6 +57,14 @@ def get_promociones_by_oferta(oferta_id):
     result, status_code = PromocionService.get_promociones_by_oferta(oferta_id)
     return jsonify(result), status_code
 
+@promocion_bp.route('/<int:promocion_id>/premios', methods=['GET'])
+def get_premios_by_promocion(promocion_id):
+    """
+    Obtiene todos los premios de una promoción específica
+    """
+    result, status_code = PromocionService.get_premios_by_promocion(promocion_id)
+    return jsonify(result), status_code
+
 @promocion_bp.route('/upload-imagen', methods=['POST'])
 def upload_imagen():
     """
@@ -265,4 +273,25 @@ def delete_promocion(promocion_id):
     Elimina una promoción (borrado lógico)
     """
     result, status_code = PromocionService.delete_promocion(promocion_id)
+    return jsonify(result), status_code
+
+@promocion_bp.route('/sorteos', methods=['GET'])
+def get_sorteos():
+    """
+    Obtiene todas las promociones que tienen sorteo (tiene_sorteo=true y estado=true)
+    Incluye información detallada de la oferta, ciclo, categoria y subcategoria
+    """
+    result, status_code = PromocionService.get_sorteos()
+    return jsonify(result), status_code
+
+@promocion_bp.route('/personasdeunsorteo/<int:promocion_id>', methods=['GET'])
+def get_personas_de_sorteo(promocion_id):
+    """
+    Obtiene todas las personas inscritas a un sorteo específico
+    Incluye información detallada de las personas y sus inscripciones
+
+    Parámetros de URL:
+    - promocion_id: ID de la promoción (sorteo)
+    """
+    result, status_code = PromocionService.get_personas_de_sorteo(promocion_id)
     return jsonify(result), status_code

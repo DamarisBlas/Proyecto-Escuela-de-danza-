@@ -51,6 +51,38 @@ class InscripcionService:
             return {"error": f"Error al obtener inscripciones completas: {str(e)}"}, 500
 
     @staticmethod
+    def get_personas_por_promocion(promocion_id):
+        """
+        Obtiene las personas inscritas en una promoción específica para el sorteo
+        """
+        try:
+            from src.models.persona import Persona
+            
+            # Obtener todas las inscripciones de la promoción
+            inscripciones = InscripcionRepository.get_by_promocion(promocion_id)
+            
+            if not inscripciones:
+                return [], 200
+            
+            personas_sorteo = []
+            for inscripcion in inscripciones:
+                # Obtener datos de la persona
+                persona = Persona.query.get(inscripcion.Persona_id_persona)
+                if persona:
+                    personas_sorteo.append({
+                        'id_persona': persona.id_persona,
+                        'nombre': persona.nombre,
+                        'apellido_paterno': persona.apellido_paterno,
+                        'fecha_inscripcion': inscripcion.fecha_inscripcion.isoformat() if inscripcion.fecha_inscripcion else None,
+                        'tipo_cuenta': persona.tipo_cuenta
+                    })
+            
+            return personas_sorteo, 200
+            
+        except Exception as e:
+            return {"error": f"Error al obtener personas del sorteo: {str(e)}"}, 500
+
+    @staticmethod
     def get_inscritos_por_horario(horario_id):
         """
         Obtiene todas las personas inscritas a un horario específico
@@ -210,6 +242,7 @@ class InscripcionService:
             # Extraer clases seleccionadas y método de pago del body
             clases_seleccionadas = inscripcion_data.pop('clases_seleccionadas', [])
             metodo_pago_id = inscripcion_data.pop('metodo_pago_id')
+            payment_intent_id = inscripcion_data.pop('payment_intent_id', None)  # ID de Stripe (opcional)
 
             # Extraer info de cuotas (separar para no pasar como keyword inesperado)
             numero_cuotas_in = inscripcion_data.pop('numero_cuotas', None)
@@ -232,6 +265,11 @@ class InscripcionService:
             metodo_pago = MetodoPagoRepository.get_by_id(metodo_pago_id)
             if not metodo_pago:
                 return {"error": "Método de pago no encontrado"}, 404
+            
+            # Validación especial para Stripe (tarjeta): NO permite cuotas
+            es_pago_stripe = payment_intent_id is not None or metodo_pago.nombre_metodo in ['Tarjeta', 'Stripe', 'Card']
+            if es_pago_stripe and inscripcion_data.get('pago_a_cuotas', False):
+                return {"error": "Los pagos con tarjeta no permiten cuotas. El pago debe ser único."}, 400
 
             # Calcular fechas y monto/estado
             fecha_inscripcion = datetime.strptime(inscripcion_data['fecha_inscripcion'], '%Y-%m-%d').date()
@@ -443,6 +481,14 @@ class InscripcionService:
                 fecha_pago_unico = fecha_vencimiento if metodo_pago_id != 1 else None
                 fecha_confirmacion_unico = fecha_vencimiento if metodo_pago_id != 1 else None
                 
+                # Estado del pago según método
+                if es_pago_stripe:
+                    # Pago con Stripe: empieza como "PROCESANDO" y se actualiza vía webhook
+                    estado_pago_unico = 'PROCESANDO'
+                else:
+                    # Pago efectivo u otros métodos
+                    estado_pago_unico = estado_pago
+                
                 # Actualizar campos de inscripción para pago único
                 # Use direct SQL UPDATE because model mapper may not include these columns yet
                 try:
@@ -468,8 +514,13 @@ class InscripcionService:
                     'fecha_confirmacion_director': fecha_confirmacion_unico,
                     'confirmado_por': 0,
                     'observaciones': None,
-                    'estado': estado_pago
+                    'estado': estado_pago_unico
                 }
+                
+                # Solo agregar payment_intent_id si existe
+                if payment_intent_id:
+                    pago_data['payment_intent_id'] = payment_intent_id
+                
                 pago = PagoRepository.create(pago_data)
                 pagos_creados.append(pago)
 

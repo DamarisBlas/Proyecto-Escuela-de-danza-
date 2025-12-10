@@ -24,9 +24,11 @@ from .pago import Pago
 from .notificacion import Notificacion
 from .notificacion_persona import NotificacionPersona
 from .permiso import Permiso
+from .sorteo import Sorteo
+from .ganador import Ganador
 
 __all__ = [
 	'Categoria', 'Estilo', 'Horario', 'HorarioSesion', 'Oferta', 'Paquete',
 	'Persona', 'Profesor', 'ProfesorEstilo', 'Alumno', 'Director', 'Programa', 'Sala', 'Subcategoria', 'Ciclo',
-	'Elenco', 'AlumnoFemme', 'Inscripcion', 'Promocion', 'Asistencia', 'Premio', 'MetodoPago', 'Pago', 'Notificacion', 'NotificacionPersona', 'Permiso'
+	'Elenco', 'AlumnoFemme', 'Inscripcion', 'Promocion', 'Asistencia', 'Premio', 'MetodoPago', 'Pago', 'Notificacion', 'NotificacionPersona', 'Permiso', 'Sorteo', 'Ganador'
 ]

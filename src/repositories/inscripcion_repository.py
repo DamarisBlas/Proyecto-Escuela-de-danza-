@@ -157,3 +157,10 @@ class InscripcionRepository:
         ).filter(
             Inscripcion.estado != 'CANCELADO'
         ).all()
+
+    @staticmethod
+    def get_by_promocion(promocion_id):
+        """
+        Obtiene todas las inscripciones de una promoción específica
+        """
+        return Inscripcion.query.filter_by(Promocion_id_promocion=promocion_id).all()

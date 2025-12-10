@@ -1,5 +1,6 @@
 from src.repositories.promocion_repository import PromocionRepository
 from src.repositories.premio_repository import PremioRepository
+from src.models.promocion import Promocion
 from src.app import db
 from datetime import datetime, date
 
@@ -64,6 +65,24 @@ class PromocionService:
             return [promocion.to_dict() for promocion in promociones], 200
         except Exception as e:
             return {"error": f"Error al obtener promociones de la oferta: {str(e)}"}, 500
+
+    @staticmethod
+    def get_premios_by_promocion(promocion_id):
+        """
+        Obtiene todos los premios de una promoción específica
+        """
+        try:
+            # Verificar que la promoción existe
+            promocion = PromocionRepository.get_by_id(promocion_id)
+            if not promocion:
+                return {"error": "Promoción no encontrada"}, 404
+
+            # Obtener premios de la promoción
+            premios = PremioRepository.get_by_promocion(promocion_id)
+            return [premio.to_dict() for premio in premios], 200
+            
+        except Exception as e:
+            return {"error": f"Error al obtener premios de la promoción: {str(e)}"}, 500
 
     @staticmethod
     def create_promocion(promocion_data):
@@ -253,3 +272,162 @@ class PromocionService:
         except Exception as e:
             db.session.rollback()
             return {"error": f"Error al eliminar promoción: {str(e)}"}, 500
+
+    @staticmethod
+    def get_sorteos():
+        """
+        Obtiene todas las promociones que tienen sorteo (tiene_sorteo=true y estado=true)
+        Incluye información detallada de la oferta, ciclo, categoria y subcategoria
+        """
+        try:
+            from src.models.promocion import Promocion
+            from src.models.oferta import Oferta
+            from src.models.ciclo import Ciclo
+            from src.models.subcategoria import Subcategoria
+            from src.models.categoria import Categoria
+
+            # Consulta con joins para obtener toda la información relacionada
+            sorteos_query = db.session.query(
+                Promocion,
+                Oferta.nombre_oferta,
+                Ciclo.nombre.label('nombre_ciclo'),
+                Categoria.nombre_categoria,
+                Subcategoria.nombre_subcategoria
+            ).join(
+                Oferta, Promocion.Oferta_id_oferta == Oferta.id_oferta
+            ).join(
+                Ciclo, Oferta.ciclo_id_ciclo == Ciclo.id_ciclo
+            ).join(
+                Subcategoria, Oferta.Subcategoria_id_subcategoria == Subcategoria.id_subcategoria
+            ).join(
+                Categoria, Subcategoria.Categoria_id_categoria == Categoria.id_categoria
+            ).filter(
+                Promocion.tiene_sorteo == True,
+                Promocion.estado == True,
+                Promocion.activo == True
+                
+                
+            ).all()
+
+            # Convertir resultados a lista de diccionarios
+            sorteos = []
+            for promocion, nombre_oferta, nombre_ciclo, nombre_categoria, nombre_subcategoria in sorteos_query:
+                sorteo_dict = promocion.to_dict()
+                sorteo_dict.update({
+                    'oferta': {
+                        'nombre_oferta': nombre_oferta
+                    },
+                    'ciclo': {
+                        'nombre_ciclo': nombre_ciclo
+                    },
+                    'categoria': {
+                        'nombre_categoria': nombre_categoria
+                    },
+                    'subcategoria': {
+                        'nombre_subcategoria': nombre_subcategoria
+                    }
+                })
+                sorteos.append(sorteo_dict)
+
+            return sorteos, 200
+
+        except Exception as e:
+            return {"error": f"Error al obtener sorteos: {str(e)}"}, 500
+
+    @staticmethod
+    def get_personas_de_sorteo(promocion_id):
+        """
+        Obtiene todas las personas inscritas a una promoción específica (sorteo)
+        Incluye información detallada de las personas y sus inscripciones
+        """
+        try:
+            from src.models.inscripcion import Inscripcion
+            from src.models.persona import Persona
+            from src.models.promocion import Promocion
+
+            # Verificar que la promoción existe y tiene sorteo
+            promocion = Promocion.query.get(promocion_id)
+            if not promocion:
+                return {"error": "Promoción no encontrada"}, 404
+
+            if not promocion.tiene_sorteo:
+                return {"error": "Esta promoción no tiene sorteo"}, 400
+
+            # Consulta con joins para obtener personas inscritas
+            personas_query = db.session.query(
+                Persona,
+                Inscripcion.fecha_inscripcion,
+                Inscripcion.estado.label('estado_inscripcion'),
+                Inscripcion.estado_pago
+            ).join(
+                Inscripcion, Persona.id_persona == Inscripcion.Persona_id_persona
+            ).filter(
+                Inscripcion.Promocion_id_promocion == promocion_id,
+                Inscripcion.estado == 'ACTIVO'  # Solo inscripciones activas
+            ).order_by(
+                Inscripcion.fecha_inscripcion.desc()
+            ).all()
+
+            # Convertir resultados a lista de diccionarios
+            personas_inscritas = []
+            for persona, fecha_inscripcion, estado_inscripcion, estado_pago in personas_query:
+                persona_dict = {
+                    'id_persona': persona.id_persona,
+                    'nombre': persona.nombre,
+                    'apellido_paterno': persona.apellido_paterno,
+                    'apellido_materno': persona.apellido_materno,
+                    'email': persona.email,
+                    'celular': persona.celular,
+                    'tipo_cuenta': persona.tipo_cuenta,
+                    'fecha_inscripcion': fecha_inscripcion.isoformat() if fecha_inscripcion else None,
+                    'estado_inscripcion': estado_inscripcion,
+                    'estado_pago': estado_pago
+                }
+                personas_inscritas.append(persona_dict)
+
+            return {
+                'promocion': {
+                    'id_promocion': promocion.id_promocion,
+                    'nombre_promocion': promocion.nombre_promocion,
+                    'tiene_sorteo': promocion.tiene_sorteo,
+                    'cantidad_premios': promocion.cantidad_premios
+                },
+                'total_inscritos': len(personas_inscritas),
+                'personas': personas_inscritas
+            }, 200
+
+        except Exception as e:
+            return {"error": f"Error al obtener personas del sorteo: {str(e)}"}, 500
+
+    @staticmethod
+    def get_personas_de_sorteo(promocion_id):
+        """
+        Obtiene las personas inscritas en una promoción específica para el sorteo
+        """
+        try:
+            from src.services.inscripcion_service import InscripcionService
+            
+            # Verificar que la promoción existe
+            promocion = PromocionRepository.get_by_id(promocion_id)
+            if not promocion:
+                return {"error": "Promoción no encontrada"}, 404
+            
+            # Obtener personas inscritas usando el servicio de inscripciones
+            personas, status_code = InscripcionService.get_personas_por_promocion(promocion_id)
+            
+            if status_code != 200:
+                return personas, status_code
+            
+            return {
+                'promocion': {
+                    'id_promocion': promocion.id_promocion,
+                    'nombre_promocion': promocion.nombre_promocion,
+                    'tiene_sorteo': promocion.tiene_sorteo,
+                    'cantidad_premios': promocion.cantidad_premios
+                },
+                'total_inscritos': len(personas),
+                'personas': personas
+            }, 200
+            
+        except Exception as e:
+            return {"error": f"Error al obtener personas del sorteo: {str(e)}"}, 500
