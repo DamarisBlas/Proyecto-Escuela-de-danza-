@@ -66,11 +66,7 @@ src/ml/data/*.csv
 # Toda la carpeta ML
 src/ml/
 
-# Servicio ML
-src/services/ml_service.py
 
-# Rutas ML
-src/routes/ml_routes.py
 
 # Archivos de configuración y dependencias ML
 requirements_ml.txt
